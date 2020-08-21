@@ -16,7 +16,6 @@ package main
 
 import (
     "net/http" 
-    "fmt"
     "github.com/gorilla/mux"
 )
 
