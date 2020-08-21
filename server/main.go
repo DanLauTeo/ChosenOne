@@ -15,20 +15,13 @@
 package main
 
 import (
-    "net/http" 
+	"log"
+	"net/http"
 )
 
-func GetProfile(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`called profile`))
-}
-
-func EditProfile(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`called edit`))
-}
-
-func ProfilePic(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusAccepted)
-    w.Write([]byte(`called pic`))
+func main() {
+ 
+    router := NewRouter()
+ 
+    log.Fatal(http.ListenAndServe(":8000", router))
 }

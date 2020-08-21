@@ -17,7 +17,6 @@
 package main
  
 import (
-	"log"
     "net/http" 
     "github.com/gorilla/mux"
 )
@@ -64,11 +63,4 @@ var routes = Routes{
         "/users/{id}/profile-image",
         ProfilePic,
     },
-}
-
-func main() {
- 
-    router := NewRouter()
- 
-    log.Fatal(http.ListenAndServe(":8000", router))
 }
