@@ -1,0 +1,44 @@
+.login{
+    position: absolute;
+    top: 10%;
+    left: 25%;
+    right: 25%;
+  }
+  
+  h1 {
+    text-align:  center;
+    color: #31e98c;
+  }
+  
+  button{
+      display: flex;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 30px;
+      background-color: white;
+      margin-top: 15px;
+      color: #31e98c;
+      transition: all 0.2s ease-in-out;
+      border: 2px solid #31e98c; /* Green */
+      border-radius: 8px;
+      margin-bottom: 10%;
+  }
+  
+  button:hover{
+      color: #43fbff;
+      box-shadow: 0 5px 15px #43fbff;
+      border: 2px solid #43fbff;
+  }
+  
+  img{
+    align-content: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  p,h2{
+    text-align:  center;
+    color: #31e98c;
+  }
+  
