@@ -1,25 +1,23 @@
-
-
 .logo{
   margin: auto;
 }
 
 button{
-    display: flex;
-    margin-left: 15px;
-    margin-right: 15px;
-    font-size: 18px;
-    background-color: white;
-    color: #31e98c;
-    transition: all 0.2s ease-in-out;
-    border: 2px solid #31e98c; /* Green */
-    border-radius: 8px;
+  display: flex;
+  margin-left: 15px;
+  margin-right: 15px;
+  font-size: 18px;
+  background-color: white;
+  color: #31e98c;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid #31e98c; /* Green */
+  border-radius: 8px;
 }
 
 button:hover{
-    color: #43fbff;
-    box-shadow: 0 5px 15px #43fbff;
-    border: 2px solid #43fbff;
+  color: #43fbff;
+  box-shadow: 0 5px 15px #43fbff;
+  border: 2px solid #43fbff;
 }
 
 .search-bar{
