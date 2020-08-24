@@ -48,19 +48,25 @@ var routes = Routes{
     Route{
         "Profile",
         "GET",
-        "/users/{id}",
+        "/user/{id}",
         GetProfile,
     },
     Route{
         "Customise Profile",
         "PATCH",
-        "/users/{id}",
+        "/user/{id}",
         EditProfile,
     },
     Route{
         "Update Profile Pic",
         "PUT",
-        "/users/{id}/profile-image",
+        "/user/{id}/profile-image",
         ProfilePic,
+    },
+    Route{
+        "Test Profile",
+        "GET",
+        "/",
+        CheckDatastore,
     },
 }

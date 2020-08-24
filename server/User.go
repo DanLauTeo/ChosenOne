@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+/*Contains the User struct, as well as any methods*/
 package main
 
 import (
-	"log"
-	"net/http"
+
 )
 
-func main() {
-    router := NewRouter()
- 
-    log.Fatal(http.ListenAndServe(":8000", router))
+//All strings for now, type will be changed as project develops
+type User struct {
+	Name string
+	ID string
+	ProfilePic string
+	Bio string
+	AlbumName string
+	Conversations []string
+	InterestSignature []string
 }
