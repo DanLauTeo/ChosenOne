@@ -15,12 +15,53 @@
 package main
 
 import (
-    "net/http" 
+    "net/http"
+    "cloud.google.com/go/datastore"
+    "github.com/gorilla/mux" 
+    "context"
+    "fmt"
 )
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`called profile`))
+    ctx := context.Background()
+    dsClient, err := datastore.NewClient(ctx, "capstone-2020-dan-lau-teo")
+    if err != nil {
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte(`first save error`))
+    }
+    user := &User{ "Test name", "12345", "img", "This is my bio. It is long.", "Hello", nil, nil,}
+    key := datastore.IncompleteKey("User", nil)
+    key, err = dsClient.Put(ctx, key, user)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    vars := mux.Vars(r)
+    userId := vars["id"]
+
+	if err != nil {
+		w.WriteHeader(http.StatusOK)
+        w.Write([]byte(`first load error`))
+	}
+
+    //Retrieves User(?)
+    k := datastore.NameKey("User", userId, nil)
+    
+    var e User 
+	if err := dsClient.Get(ctx, k, e); err != nil {
+		w.WriteHeader(http.StatusOK)
+        w.Write([]byte(`second load error`))
+	}
+
+	old := e.Name
+	e.Name = "Hello World!"
+
+	if _, err := dsClient.Put(ctx, k, e); err != nil {
+		// Handle error.
+	}
+
+	fmt.Printf("Updated value from %q to %q\n", old, e.Name)
+	
 }
 
 func EditProfile(w http.ResponseWriter, r *http.Request) {
