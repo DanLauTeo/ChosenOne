@@ -1,14 +1,12 @@
 <app-top-bar></app-top-bar>
 <button id="edit">Edit</button>
 <div class="aboutUser">
-  <h2>Dummy Dumm</h2>
+  <h2>{{user.username}}</h2>
   <div id="profileBody">
-      <img src="/assets/icon2.png" id="profilePic" >
-      <p id="presentation"> Existentialism is the philosophical theory that claims, 
-        “existence precedes essence”, as Jean Paul Sartre said. These ideas have
-         come to be associated with Friedrich Nietzsche, who argued that humans must
-          exercise their natural freedom or risk destroying mankind’s capacity to think 
-          critically. </p>
+      <img src={{user.profilePic}} id="profilePic" >
+      <p id="presentation"> {{user.bio}} </p>
   </div>
+  <p> Token: {{user.token}}
+  </p>
 </div>
 
