@@ -22,10 +22,6 @@ import (
 	"os"
 )
 
-type Configuration struct {
-	Project string `json:"project"`
-}
-
 func init() {
 	file, err := os.Open("config.json")
 	if err != nil {
@@ -33,15 +29,16 @@ func init() {
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	config = Configuration{}
 	err = decoder.Decode(&config)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-var config Configuration
+var config = struct {
+	Project string `json:"project"`
+}{}
 
-func Config() Configuration {
-	return config
+func Project() string {
+	return config.Project
 }

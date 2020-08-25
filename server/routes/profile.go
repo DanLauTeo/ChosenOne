@@ -30,7 +30,7 @@ import (
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, config.Config().Project)
+	client, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("first save error"))
@@ -54,7 +54,7 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	dsClient, err := datastore.NewClient(ctx, config.Config().Project)
+	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusOK)
