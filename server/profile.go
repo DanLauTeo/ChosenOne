@@ -15,14 +15,15 @@
 package main
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"google.golang.org/api/iterator"
 	"log"
 	"net/http"
+
+	"cloud.google.com/go/datastore"
+	"github.com/gorilla/mux"
+	"google.golang.org/api/iterator"
 )
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
