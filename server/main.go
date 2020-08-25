@@ -19,10 +19,7 @@ import (
 	"net/http"
 )
 
-var Conf Configuration
-
 func main() {
-	Conf = Config()
 	router := NewRouter()
 
 	log.Fatal(http.ListenAndServe(":8000", router))

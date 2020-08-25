@@ -12,18 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*Contains the User struct, as well as any methods*/
-package main
+/*This file manages the different routes of the project*/
 
-import ()
+package config
 
-//All strings for now, type will be changed as project develops
-type User struct {
-	Name              string
-	ID                string
-	ProfilePic        string
-	Bio               string
-	AlbumName         string
-	Conversations     []string
-	InterestSignature []string
+import (
+	"encoding/json"
+	"log"
+	"os"
+)
+
+type Configuration struct {
+	Project string `json:"project"`
+}
+
+func init() {
+	file, err := os.Open("config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	config = Configuration{}
+	err = decoder.Decode(&config)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+var config Configuration
+
+func Config() Configuration {
+	return config
 }
