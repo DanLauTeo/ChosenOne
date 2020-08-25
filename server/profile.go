@@ -50,7 +50,8 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, "lauraod-step-2020")
+	fmt.Println(Conf)
+	dsClient, err := datastore.NewClient(ctx, Conf.Project)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusOK)

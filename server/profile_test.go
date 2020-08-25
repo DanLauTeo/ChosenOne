@@ -25,6 +25,7 @@ import (
 )
 
 func fillDatastore() {
+	Conf = Config()
 	users := make([]User, 0)
 	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	users = append(users, u)
