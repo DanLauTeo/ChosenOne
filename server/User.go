@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 /*Contains the User struct, as well as any methods*/
 package main
 
-import (
-
-)
+import ()
 
 //All strings for now, type will be changed as project develops
 type User struct {
-	Name string
-	ID string
-	ProfilePic string
-	Bio string
-	AlbumName string
-	Conversations []string
+	Name              string
+	ID                string
+	ProfilePic        string
+	Bio               string
+	AlbumName         string
+	Conversations     []string
 	InterestSignature []string
 }

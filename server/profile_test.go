@@ -15,22 +15,22 @@
 package main
 
 import (
-	"testing"
-	"net/http/httptest"
-	"net/http"
-	"context"
 	"cloud.google.com/go/datastore"
-	"fmt"
+	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func fillDatastore() {
 	users := make([]User, 0)
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil,}
+	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	users = append(users, u)
-	u = User{"User Two", "2", "img", "User Two's Bio", "album", nil, nil,}
+	u = User{"User Two", "2", "img", "User Two's Bio", "album", nil, nil}
 	users = append(users, u)
-	u = User{"User Three", "3", "img", "User Three's Bio", "album", nil, nil,}
+	u = User{"User Three", "3", "img", "User Three's Bio", "album", nil, nil}
 	users = append(users, u)
 
 	for _, user := range users {
@@ -39,18 +39,17 @@ func fillDatastore() {
 }
 
 func NewProfile(u User) {
-    ctx := context.Background()
-    dsClient, err := datastore.NewClient(ctx, "lauraod-step-2020")
-    if err != nil {
-        fmt.Println(err)
-    }
-    key := datastore.NameKey("User", u.ID,  nil)
-    key, err = dsClient.Put(ctx, key, &u)
-    if err != nil {
-        fmt.Println(err)
-    }
+	ctx := context.Background()
+	dsClient, err := datastore.NewClient(ctx, "lauraod-step-2020")
+	if err != nil {
+		fmt.Println(err)
+	}
+	key := datastore.NameKey("User", u.ID, nil)
+	key, err = dsClient.Put(ctx, key, &u)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
-
 
 func TestGetProfile(t *testing.T) {
 	fillDatastore()
@@ -66,7 +65,7 @@ func TestGetProfile(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil,}
+	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	// Check the response body is what we expect.
 	json, _ := json.MarshalIndent(u, "", "  ")
 	expected := string(json)
@@ -74,7 +73,7 @@ func TestGetProfile(t *testing.T) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
 	}
-	
+
 	//Test 2: Invalid ID
 	req, err = http.NewRequest("GET", "/user/7", nil)
 	if err != nil {
@@ -117,7 +116,7 @@ func TestEditProfile(t *testing.T) {
 }
 
 func TestProfilePic(t *testing.T) {
-    req, err := http.NewRequest("PUT", "/user/id/profile-image", nil)
+	req, err := http.NewRequest("PUT", "/user/id/profile-image", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
