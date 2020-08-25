@@ -15,52 +15,58 @@
 /*This file manages the different routes of the project*/
 
 package main
- 
+
 import (
-    "net/http" 
-    "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
+	"net/http"
 )
- 
+
 type Route struct {
-    Name        string
-    Method      string
-    Pattern     string
-    HandlerFunc http.HandlerFunc
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
 }
- 
+
 type Routes []Route
- 
+
 func NewRouter() *mux.Router {
- 
-    router := mux.NewRouter().StrictSlash(true)
-    for _, route := range routes {
-        router.
-            Methods(route.Method).
-            Path(route.Pattern).
-            Name(route.Name).
-            Handler(route.HandlerFunc)
-    }
- 
-    return router
+
+	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range routes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(route.HandlerFunc)
+	}
+
+	return router
 }
- 
+
 var routes = Routes{
-    Route{
-        "Profile",
-        "GET",
-        "/users/{id}",
-        GetProfile,
-    },
-    Route{
-        "Customise Profile",
-        "PATCH",
-        "/users/{id}",
-        EditProfile,
-    },
-    Route{
-        "Update Profile Pic",
-        "PUT",
-        "/users/{id}/profile-image",
-        ProfilePic,
-    },
+	Route{
+		"Profile",
+		"GET",
+		"/user/{id}",
+		GetProfile,
+	},
+	Route{
+		"Customise Profile",
+		"PATCH",
+		"/user/{id}",
+		EditProfile,
+	},
+	Route{
+		"Update Profile Pic",
+		"PUT",
+		"/user/{id}/profile-image",
+		ProfilePic,
+	},
+	Route{
+		"Test Profile",
+		"GET",
+		"/",
+		CheckDatastore,
+	},
 }
