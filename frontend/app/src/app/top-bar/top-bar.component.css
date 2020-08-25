@@ -3,24 +3,30 @@
 }
 
 button{
-  display: flex;
-  margin-left: 15px;
-  margin-right: 15px;
+  padding: 0px;
+  margin-top:3%;
+  margin-bottom: 3%;
   font-size: 18px;
   background-color: white;
   color: #31e98c;
   transition: all 0.2s ease-in-out;
-  border: 2px solid #31e98c; /* Green */
   border-radius: 8px;
+  border-style: hidden;
+  text-align: center;
 }
 
 button:hover{
   color: #43fbff;
-  box-shadow: 0 5px 15px #43fbff;
-  border: 2px solid #43fbff;
 }
 
 .search-bar{
   display: grid;
   grid-template-columns: auto auto auto;
+}
+
+.top-bar{
+  box-shadow: 0 2px 1px #31e98c,
+  0 4px 2px #31e98c,
+  0 8px 4px #31e98c;
+  display: grid;
 }
