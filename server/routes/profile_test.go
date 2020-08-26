@@ -15,17 +15,18 @@
 package routes
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
 	"encoding/json"
 	"fmt"
-	jsonpatch "github.com/evanphx/json-patch"
 	"localdev/main/config"
 	"localdev/main/models"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"cloud.google.com/go/datastore"
+	jsonpatch "github.com/evanphx/json-patch"
 )
 
 func fillDatastore() {
@@ -89,7 +90,7 @@ func TestGetProfileInvalid(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler := NewRouter()
 	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
+	if status := rr.Code; status != http.StatusNotFound {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}

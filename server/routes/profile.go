@@ -15,7 +15,6 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -30,7 +29,7 @@ import (
 )
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	ctx := r.Context()
 	client, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
@@ -53,12 +52,19 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	if r.Method != http.MethodGet {
+		log.Printf("Invalid request method")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Invalid request method"))
+		return
+	}
+
+	ctx := r.Context()
 
 	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot connect to DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("datastore error"))
 		return
 	}
@@ -67,7 +73,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	userID := vars["id"]
 
 	if len(userID) == 0 {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no ID provided"))
 		return
 	}
@@ -76,16 +82,16 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	if err := dsClient.Get(ctx, k, &user); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
 		return
 	}
 
 	out, err := json.MarshalIndent(user, "", "  ")
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot convert User to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("error converting to json"))
 		return
 	}
@@ -95,12 +101,19 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditProfile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPatch {
+		log.Printf("Invalid request method")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Invalid request method"))
+		return
+	}
+
 	//Connect to datastore
-	ctx := context.Background()
+	ctx := r.Context()
 	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot connect to DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("datastore error"))
 		return
 	}
@@ -109,7 +122,7 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
 	if len(userID) == 0 {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no ID provided"))
 		return
 	}
@@ -118,8 +131,8 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	if err := dsClient.Get(ctx, k, &user); err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
 		return
 	}
@@ -127,32 +140,36 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	//Get request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot read request body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("error reading body"))
 		return
 	}
 
 	//Get patch operations from body
-	var bodyMapped []map[string]string
+	var bodyMapped []struct {
+		Op    string
+		Path  string
+		Value string
+	}
 	err = json.Unmarshal(body, &bodyMapped)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("error reading body"))
+		log.Printf("Cannot read patch operations: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("error reading patch operations"))
 		return
 	}
 
 	//Read through operations and apply valid changes
 	for _, v := range bodyMapped {
-		if v["op"] == "replace" {
-			switch v["path"] {
+		if v.Op == "replace" {
+			switch v.Path {
 			case "/Name":
-				user.Name = v["value"]
+				user.Name = v.Value
 			case "/Bio":
-				user.Bio = v["value"]
+				user.Bio = v.Value
 			case "/ProfilePic":
-				user.ProfilePic = v["value"]
+				user.ProfilePic = v.Value
 			}
 		}
 	}
@@ -160,8 +177,8 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	//Save patched user
 	k, err = dsClient.Put(ctx, k, &user)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot save user to DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("error storing new user"))
 		return
 	}
@@ -169,8 +186,8 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	//Return updated user
 	out, err := json.MarshalIndent(user, "", "  ")
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusOK)
+		log.Printf("Cannot convert user to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("error converting to json"))
 		return
 	}
