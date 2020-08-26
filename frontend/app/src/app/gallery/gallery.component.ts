@@ -12,4 +12,13 @@ export class GalleryComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  changeOutput() {
+    if (document.getElementById("gallery").className == "square-gallery"){
+      document.getElementById("gallery").className = "list-gallery";
+      document.getElementById("gridList").innerText = "Grid";
+    } else {
+      document.getElementById("gallery").className = "square-gallery";
+      document.getElementById("gridList").innerText = "List";      
+    } 
+  }
 }
