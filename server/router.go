@@ -17,8 +17,10 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
+	"localdev/main/routes"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Route struct {
@@ -33,7 +35,7 @@ type Routes []Route
 func NewRouter() *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
+	for _, route := range apiRoutes {
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
@@ -44,29 +46,29 @@ func NewRouter() *mux.Router {
 	return router
 }
 
-var routes = Routes{
+var apiRoutes = Routes{
 	Route{
 		"Profile",
 		"GET",
 		"/user/{id}",
-		GetProfile,
+		routes.GetProfile,
 	},
 	Route{
 		"Customise Profile",
 		"PATCH",
 		"/user/{id}",
-		EditProfile,
+		routes.EditProfile,
 	},
 	Route{
 		"Update Profile Pic",
 		"PUT",
 		"/user/{id}/profile-image",
-		ProfilePic,
+		routes.ProfilePic,
 	},
 	Route{
 		"Test Profile",
 		"GET",
 		"/",
-		CheckDatastore,
+		routes.CheckDatastore,
 	},
 }

@@ -14,29 +14,31 @@
 
 /*This file manages the different routes of the project*/
 
-package main
+package config
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 )
 
-type Configuration struct {
-	Project string
-}
-
-func Config() Configuration {
+func init() {
 	file, err := os.Open("config.json")
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Fatal(err)
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	configuration := Configuration{}
-	err = decoder.Decode(&configuration)
+	err = decoder.Decode(&config)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Fatal(err)
 	}
-	return configuration
+}
+
+var config = struct {
+	Project string `json:"project"`
+}{}
+
+func Project() string {
+	return config.Project
 }
