@@ -1,0 +1,32 @@
+#presentation{
+    width: 300px;
+    border: 5px solid #31e98c;
+    padding: 50px;
+    margin: 20px;
+}
+
+#profilePic{
+    width: 130px;
+    margin: auto;
+    border-radius: 100%;
+}
+
+.aboutUser{
+    margin-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 650px;
+    clear: both;
+}
+
+#profileBody{
+    display: grid;
+    grid-template-columns: auto auto;
+    margin: auto;
+    left: 30%;
+    right: 30%;
+}
+
+h2{
+    color:  #31e98c;
+}
