@@ -12,18 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/*This file manages the different routes of the project*/
+
 package main
 
 import (
-	"log"
-	"net/http"
+	"encoding/json"
+	"fmt"
+	"os"
 )
 
-var Conf Configuration
+type Configuration struct {
+	Project string
+}
 
-func main() {
-	Conf = Config()
-	router := NewRouter()
-
-	log.Fatal(http.ListenAndServe(":8000", router))
+func Config() Configuration {
+	file, err := os.Open("config.json")
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	configuration := Configuration{}
+	err = decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	return configuration
 }
