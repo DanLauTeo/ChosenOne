@@ -12,22 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package routes
 
 import (
-	"cloud.google.com/go/datastore"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
-	"google.golang.org/api/iterator"
+	"localdev/main/config"
+	"localdev/main/models"
 	"log"
 	"net/http"
+
+	"cloud.google.com/go/datastore"
+	"github.com/gorilla/mux"
+	"google.golang.org/api/iterator"
 )
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, "lauraod-step-2020")
+	client, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("first save error"))
@@ -35,7 +38,7 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	query := datastore.NewQuery("User")
 	it := client.Run(ctx, query)
 	for {
-		var user User
+		var user models.User
 		_, err := it.Next(&user)
 		if err == iterator.Done {
 			break
@@ -50,8 +53,8 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	fmt.Println(Conf)
-	dsClient, err := datastore.NewClient(ctx, Conf.Project)
+
+	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusOK)
@@ -70,7 +73,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	k := datastore.NameKey("User", userID, nil)
 
-	var user User
+	var user models.User
 	if err := dsClient.Get(ctx, k, &user); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusOK)

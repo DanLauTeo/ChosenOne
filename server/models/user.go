@@ -13,9 +13,7 @@
 // limitations under the License.
 
 /*Contains the User struct, as well as any methods*/
-package main
-
-import ()
+package models
 
 //All strings for now, type will be changed as project develops
 type User struct {
