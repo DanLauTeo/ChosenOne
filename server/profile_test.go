@@ -19,32 +19,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	jsonpatch "github.com/evanphx/json-patch"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 func fillDatastore() {
 	Conf = Config()
-	users := make([]User, 0)
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
-	users = append(users, u)
-	u = User{"User Two", "2", "img", "User Two's Bio", "album", nil, nil}
-	users = append(users, u)
-	u = User{"User Three", "3", "img", "User Three's Bio", "album", nil, nil}
-	users = append(users, u)
-
-	for _, user := range users {
-		NewProfile(user)
-	}
-}
-
-func NewProfile(u User) {
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, "lauraod-step-2020")
+	dsClient, err := datastore.NewClient(ctx, Conf.Project)
 	if err != nil {
 		fmt.Println(err)
 	}
+	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	key := datastore.NameKey("User", u.ID, nil)
 	key, err = dsClient.Put(ctx, key, &u)
 	if err != nil {
@@ -52,7 +41,19 @@ func NewProfile(u User) {
 	}
 }
 
-func TestGetProfile(t *testing.T) {
+func emptyDatastore() {
+	ctx := context.Background()
+	dsClient, err := datastore.NewClient(ctx, Conf.Project)
+	if err != nil {
+		fmt.Println(err)
+	}
+	key := datastore.NameKey("User", "1", nil)
+	if err := dsClient.Delete(ctx, key); err != nil {
+		fmt.Println(err)
+	}
+}
+
+func TestGetProfileValid(t *testing.T) {
 	fillDatastore()
 	//Test 1: Valid request
 	req, err := http.NewRequest("GET", "/user/1", nil)
@@ -74,29 +75,13 @@ func TestGetProfile(t *testing.T) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
 	}
-
-	//Test 2: Invalid ID
-	req, err = http.NewRequest("GET", "/user/7", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr = httptest.NewRecorder()
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusOK)
-	}
-
-	// Check the response body is what we expect.
-	expected = `entity not found`
-	if rr.Body.String() != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body.String(), expected)
-	}
+	emptyDatastore()
 }
 
-func TestEditProfile(t *testing.T) {
-	req, err := http.NewRequest("PATCH", "/user/id", nil)
+func TestGetProfileInvalid(t *testing.T) {
+	fillDatastore()
+	//Test 2: Invalid ID
+	req, err := http.NewRequest("GET", "/user/7", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,11 +94,128 @@ func TestEditProfile(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	expected := `called edit`
+	expected := `entity not found`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
 	}
+	emptyDatastore()
+}
+
+func TestEditProfileValid(t *testing.T) {
+	fillDatastore()
+	//Test 1: Change name, description, profile photo
+	body := strings.NewReader(`[{"op": "replace", "path": "/Name", "value": "Success"},
+		{"op": "replace", "path": "/Bio", "value": "Successful change"},
+		{"op": "replace", "path": "/ProfilePic", "value": "Successful change"}
+	]`)
+
+	req, err := http.NewRequest("PATCH", "/user/1", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewRouter()
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	u := User{"Success", "1", "Successful change", "Successful change", "album", nil, nil}
+	expected, _ := json.MarshalIndent(u, "", "  ")
+	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), string(expected))
+	}
+	emptyDatastore()
+}
+
+func TestEditProfileInvalidReplace(t *testing.T) {
+	fillDatastore()
+	//Test 2: Change something not allowed
+	body := strings.NewReader(`[{"op": "replace", "path": "/ID", "value": "Wronggggg"}]`)
+
+	req, err := http.NewRequest("PATCH", "/user/1", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewRouter()
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
+	expected, _ := json.MarshalIndent(u, "", "  ")
+	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), string(expected))
+	}
+	emptyDatastore()
+}
+
+func TestEditProfileInvalidOps(t *testing.T) {
+	fillDatastore()
+	//Test 3: Remove or add a field
+	body := strings.NewReader(`[{"op": "remove", "path": "/Name"},
+		{"op": "add", "path": "/NewPath", "value": "not allowed"}
+	]`)
+
+	req, err := http.NewRequest("PATCH", "/user/1", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewRouter()
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
+	expected, _ := json.MarshalIndent(u, "", "  ")
+	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), string(expected))
+	}
+	emptyDatastore()
+}
+
+func TestEditProfileMixed(t *testing.T) {
+	fillDatastore()
+	//Test 4: If receiving a mix of legal and illegal patches, apply legal patches
+	body := strings.NewReader(`[{"op": "remove", "path": "/Name"},
+		{"op": "replace", "path": "/Bio", "value": "Success"},
+		{"op": "replace", "path": "/ID", "value": "Wronggggg"}
+	]`)
+
+	req, err := http.NewRequest("PATCH", "/user/1", body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewRouter()
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	u := User{"User One", "1", "img", "Success", "album", nil, nil}
+	expected, _ := json.MarshalIndent(u, "", "  ")
+	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), string(expected))
+	}
+	emptyDatastore()
 }
 
 func TestProfilePic(t *testing.T) {

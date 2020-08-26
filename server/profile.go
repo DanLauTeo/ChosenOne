@@ -21,13 +21,14 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"google.golang.org/api/iterator"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	client, err := datastore.NewClient(ctx, "lauraod-step-2020")
+	client, err := datastore.NewClient(ctx, Conf.Project)
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("first save error"))
@@ -50,7 +51,6 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	fmt.Println(Conf)
 	dsClient, err := datastore.NewClient(ctx, Conf.Project)
 	if err != nil {
 		log.Println(err)
@@ -91,8 +91,87 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditProfile(w http.ResponseWriter, r *http.Request) {
+	//Connect to datastore
+	ctx := context.Background()
+	dsClient, err := datastore.NewClient(ctx, Conf.Project)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("datastore error"))
+		return
+	}
+
+	//Retrieve user from datastore
+	vars := mux.Vars(r)
+	userID := vars["id"]
+	if len(userID) == 0 {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("no ID provided"))
+		return
+	}
+
+	k := datastore.NameKey("User", userID, nil)
+
+	var user User
+	if err := dsClient.Get(ctx, k, &user); err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("entity not found"))
+		return
+	}
+
+	//Get request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("error reading body"))
+		return
+	}
+
+	//Get patch operations from body
+	var bodyMapped []map[string]string
+	err = json.Unmarshal(body, &bodyMapped)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("error reading body"))
+		return
+	}
+
+	//Read through operations and apply valid changes
+	for _, v := range bodyMapped {
+		if v["op"] == "replace" {
+			switch v["path"] {
+			case "/Name":
+				user.Name = v["value"]
+			case "/Bio":
+				user.Bio = v["value"]
+			case "/ProfilePic":
+				user.ProfilePic = v["value"]
+			}
+		}
+	}
+
+	//Save patched user
+	k, err = dsClient.Put(ctx, k, &user)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("error storing new user"))
+		return
+	}
+
+	//Return updated user
+	out, err := json.MarshalIndent(user, "", "  ")
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("error converting to json"))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("called edit"))
+	w.Write([]byte(out))
 }
 
 func ProfilePic(w http.ResponseWriter, r *http.Request) {
