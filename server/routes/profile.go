@@ -97,7 +97,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 func EditProfile(w http.ResponseWriter, r *http.Request) {
 	//Connect to datastore
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, Conf.Project)
+	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusOK)
@@ -116,7 +116,7 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 
 	k := datastore.NameKey("User", userID, nil)
 
-	var user User
+	var user models.User
 	if err := dsClient.Get(ctx, k, &user); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusOK)

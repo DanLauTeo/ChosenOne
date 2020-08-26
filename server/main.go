@@ -17,10 +17,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"localdev/main/routes"
 )
 
 func main() {
-	router := NewRouter()
+	router := routes.NewRouter()
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }

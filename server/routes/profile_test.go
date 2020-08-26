@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package routes
 
 import (
 	"cloud.google.com/go/datastore"
@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	jsonpatch "github.com/evanphx/json-patch"
+	"localdev/main/config"
+	"localdev/main/models"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -27,13 +29,12 @@ import (
 )
 
 func fillDatastore() {
-	Conf = Config()
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, Conf.Project)
+	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		fmt.Println(err)
 	}
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
+	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	key := datastore.NameKey("User", u.ID, nil)
 	key, err = dsClient.Put(ctx, key, &u)
 	if err != nil {
@@ -43,7 +44,7 @@ func fillDatastore() {
 
 func emptyDatastore() {
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, Conf.Project)
+	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -67,7 +68,7 @@ func TestGetProfileValid(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
+	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	// Check the response body is what we expect.
 	json, _ := json.MarshalIndent(u, "", "  ")
 	expected := string(json)
@@ -123,7 +124,7 @@ func TestEditProfileValid(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	u := User{"Success", "1", "Successful change", "Successful change", "album", nil, nil}
+	u := models.User{"Success", "1", "Successful change", "Successful change", "album", nil, nil}
 	expected, _ := json.MarshalIndent(u, "", "  ")
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -150,7 +151,7 @@ func TestEditProfileInvalidReplace(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
+	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	expected, _ := json.MarshalIndent(u, "", "  ")
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -179,7 +180,7 @@ func TestEditProfileInvalidOps(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	u := User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
+	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	expected, _ := json.MarshalIndent(u, "", "  ")
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -209,7 +210,7 @@ func TestEditProfileMixed(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	u := User{"User One", "1", "img", "Success", "album", nil, nil}
+	u := models.User{"User One", "1", "img", "Success", "album", nil, nil}
 	expected, _ := json.MarshalIndent(u, "", "  ")
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",

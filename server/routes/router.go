@@ -14,12 +14,10 @@
 
 /*This file manages the different routes of the project*/
 
-package main
+package routes
 
 import (
-	"localdev/main/routes"
 	"net/http"
-
 	"github.com/gorilla/mux"
 )
 
@@ -51,24 +49,24 @@ var apiRoutes = Routes{
 		"Profile",
 		"GET",
 		"/user/{id}",
-		routes.GetProfile,
+		GetProfile,
 	},
 	Route{
 		"Customise Profile",
 		"PATCH",
 		"/user/{id}",
-		routes.EditProfile,
+		EditProfile,
 	},
 	Route{
 		"Update Profile Pic",
 		"PUT",
 		"/user/{id}/profile-image",
-		routes.ProfilePic,
+		ProfilePic,
 	},
 	Route{
 		"Test Profile",
 		"GET",
 		"/",
-		routes.CheckDatastore,
+		CheckDatastore,
 	},
 }
