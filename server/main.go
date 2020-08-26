@@ -17,10 +17,26 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+
+	"google.golang.org/appengine"
 )
 
 func main() {
 	router := NewRouter()
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+	if _, local := os.LookupEnv("LOCAL_TESTING"); !local {
+		http.Handle("/", router)
+		appengine.Main()
+	} else {
+		port := os.Getenv("PORT")
+		if port == "" {
+			port = "8080"
+			log.Printf("Defaulting to port %s", port)
+		}
+
+		log.Printf("Listening on port %s", port)
+
+		http.ListenAndServe(":"+port, router)
+	}
 }

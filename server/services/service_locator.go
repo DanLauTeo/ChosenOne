@@ -11,6 +11,7 @@ func (_ *ServiceLocator) UserService() UserService {
 }
 
 var (
+	Locator     ServiceLocator = ServiceLocator{}
 	userService UserService
 )
 

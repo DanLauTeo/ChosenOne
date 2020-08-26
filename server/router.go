@@ -71,4 +71,22 @@ var apiRoutes = Routes{
 		"/",
 		routes.CheckDatastore,
 	},
+	Route{
+		"Get login URL",
+		"GET",
+		"/login-url",
+		routes.LoginURL,
+	},
+	Route{
+		"Get logout URL",
+		"GET",
+		"/logout-url",
+		routes.LogoutURL,
+	},
+	Route{
+		"Get current user id",
+		"GET",
+		"/who",
+		routes.Who,
+	},
 }
