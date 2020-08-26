@@ -13,5 +13,11 @@
     {
       "path": "./tsconfig.spec.json"
     }
-]
+],
+  "compilerOptions": {
+    "types": ["gapi.auth2"],
+    "experimentalDecorators": true,
+    "allowJs": true}
 }
+
+

@@ -1,10 +1,11 @@
 <app-top-bar></app-top-bar>
-<button id="edit">Edit</button>
+<button (click)="logout()">Logout</button>
+<button id="edit" (click)="edit()">Edit</button>
 <div class="aboutUser">
-  <h2>{{user.username}}</h2>
+  <h2 id="username">{{user.username}}</h2>
   <div id="profileBody">
       <img src={{user.profilePic}} id="profilePic" >
-      <p id="presentation"> {{user.bio}} </p>
+      <p id="bio" > <button id="edit">Edit</button> {{user.bio}} </p>
   </div>
 </div>
 <app-gallery></app-gallery>

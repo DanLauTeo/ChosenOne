@@ -26,7 +26,7 @@ button:hover{
 
 .top-bar{
   box-shadow: 0 2px 1px #31e98c,
-  0 4px 2px #31e98c,
-  0 8px 4px #31e98c;
+  0 4px 2px #60d198,
+  0 8px 4px #82b89d;
   display: grid;
 }
