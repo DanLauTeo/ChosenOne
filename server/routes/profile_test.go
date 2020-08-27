@@ -18,7 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"localdev/main/config"
+	"localdev/main/dsclient"
 	"localdev/main/models"
 	"net/http"
 	"net/http/httptest"
@@ -29,15 +29,17 @@ import (
 	jsonpatch "github.com/evanphx/json-patch"
 )
 
+func init() {
+	ctx := context.Background()
+	dsclient.Init(ctx)
+}
+
 func fillDatastore() {
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, config.Project())
-	if err != nil {
-		fmt.Println(err)
-	}
+	dsClient := dsclient.DsClient()
 	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	key := datastore.NameKey("User", u.ID, nil)
-	key, err = dsClient.Put(ctx, key, &u)
+	key, err := dsClient.Put(ctx, key, &u)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -45,10 +47,7 @@ func fillDatastore() {
 
 func emptyDatastore() {
 	ctx := context.Background()
-	dsClient, err := datastore.NewClient(ctx, config.Project())
-	if err != nil {
-		fmt.Println(err)
-	}
+	dsClient := dsclient.DsClient()
 	key := datastore.NameKey("User", "1", nil)
 	if err := dsClient.Delete(ctx, key); err != nil {
 		fmt.Println(err)
@@ -71,7 +70,7 @@ func TestGetProfileValid(t *testing.T) {
 	}
 	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	// Check the response body is what we expect.
-	json, _ := json.MarshalIndent(u, "", "  ")
+	json, _ := json.Marshal(u)
 	expected := string(json)
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -126,7 +125,7 @@ func TestEditProfileValid(t *testing.T) {
 
 	// Check the response body is what we expect.
 	u := models.User{"Success", "1", "Successful change", "Successful change", "album", nil, nil}
-	expected, _ := json.MarshalIndent(u, "", "  ")
+	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), string(expected))
@@ -153,7 +152,7 @@ func TestEditProfileInvalidReplace(t *testing.T) {
 
 	// Check the response body is what we expect.
 	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
-	expected, _ := json.MarshalIndent(u, "", "  ")
+	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), string(expected))
@@ -182,7 +181,7 @@ func TestEditProfileInvalidOps(t *testing.T) {
 
 	// Check the response body is what we expect.
 	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
-	expected, _ := json.MarshalIndent(u, "", "  ")
+	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), string(expected))
@@ -212,7 +211,7 @@ func TestEditProfileMixed(t *testing.T) {
 
 	// Check the response body is what we expect.
 	u := models.User{"User One", "1", "img", "Success", "album", nil, nil}
-	expected, _ := json.MarshalIndent(u, "", "  ")
+	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), string(expected))

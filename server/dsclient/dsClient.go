@@ -12,20 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dsclient
 
 import (
 	"context"
+	"localdev/main/config"
 	"log"
-	"net/http"
-	"localdev/main/routes"
-	"localdev/main/dsclient"
+
+	"cloud.google.com/go/datastore"
 )
 
-func main() {
-	ctx := context.Background()
-	dsclient.Init(ctx)
-	router := routes.NewRouter()
+var dsClient *datastore.Client
 
-	log.Fatal(http.ListenAndServe(":8000", router))
+func Init(ctx context.Context) {
+	var err error
+	dsClient, err = datastore.NewClient(ctx, config.Project())
+	if err != nil {
+		log.Fatalf("Cannot connect to DataStore: %v", err)
+	}
+}
+
+func DsClient() *datastore.Client {
+	if dsClient != nil {
+		return dsClient
+	} else {
+		log.Fatal("Datastore client not initialised")
+		return nil
+	}
 }

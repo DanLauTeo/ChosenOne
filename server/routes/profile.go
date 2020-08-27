@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"localdev/main/config"
+	"localdev/main/dsclient"
 	"localdev/main/models"
 	"log"
 	"net/http"
@@ -30,13 +30,8 @@ import (
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	client, err := datastore.NewClient(ctx, config.Project())
-	if err != nil {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("first save error"))
-	}
 	query := datastore.NewQuery("User")
-	it := client.Run(ctx, query)
+	it := dsclient.DsClient().Run(ctx, query)
 	for {
 		var user models.User
 		_, err := it.Next(&user)
@@ -60,16 +55,8 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-
-	dsClient, err := datastore.NewClient(ctx, config.Project())
-	if err != nil {
-		log.Printf("Cannot connect to DataStore: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("datastore error"))
-		return
-	}
+	dsClient := dsclient.DsClient()
 	vars := mux.Vars(r)
-
 	userID := vars["id"]
 
 	if len(userID) == 0 {
@@ -88,11 +75,10 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := json.MarshalIndent(user, "", "  ")
+	out, err := json.Marshal(user)
 	if err != nil {
 		log.Printf("Cannot convert User to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error converting to json"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -110,13 +96,7 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 
 	//Connect to datastore
 	ctx := r.Context()
-	dsClient, err := datastore.NewClient(ctx, config.Project())
-	if err != nil {
-		log.Printf("Cannot connect to DataStore: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("datastore error"))
-		return
-	}
+	dsClient := dsclient.DsClient()
 
 	//Retrieve user from datastore
 	vars := mux.Vars(r)
@@ -142,7 +122,6 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Cannot read request body: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error reading body"))
 		return
 	}
 
@@ -156,7 +135,6 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Cannot read patch operations: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error reading patch operations"))
 		return
 	}
 
@@ -179,16 +157,14 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Cannot save user to DataStore: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error storing new user"))
 		return
 	}
 
 	//Return updated user
-	out, err := json.MarshalIndent(user, "", "  ")
+	out, err := json.Marshal(user)
 	if err != nil {
 		log.Printf("Cannot convert user to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("error converting to json"))
 		return
 	}
 	w.WriteHeader(http.StatusOK)
