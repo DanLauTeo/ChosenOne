@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as _ from 'lodash';
 import { AccountService } from '../../_services/account.service';
 import { User  } from '../../_models/user';
+
 @Component({
   selector: 'app-profile-pic',
   templateUrl: './profile-pic.component.html',
@@ -42,6 +43,7 @@ export class ProfilePicComponent implements OnInit {
               this.imageError = 'Only Images are allowed ( JPG | PNG )';
               return false;
           }
+
           const reader = new FileReader();
           reader.onload = (e: any) => {
               const image = new Image();
@@ -50,14 +52,11 @@ export class ProfilePicComponent implements OnInit {
                   const img_height = rs.currentTarget['height'];
                   const img_width = rs.currentTarget['width'];
 
-                  console.log(img_height, img_width);
-
-
-                  if (img_height > max_height && img_width > max_width) {
+                  if (img_height > max_height || img_width > max_width) {
                       this.imageError =
                           'Maximum dimentions allowed ' +
                           max_height +
-                          '*' +
+                          'x' +
                           max_width +
                           'px';
                       return false;
