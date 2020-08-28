@@ -15,10 +15,10 @@ export class GalleryComponent implements OnInit {
   changeOutput() {
     if (document.getElementById("gallery").className == "square-gallery"){
       document.getElementById("gallery").className = "list-gallery";
-      document.getElementById("gridList").innerText = "Grid";
+      //document.getElementById("img").src="../../assets/icons/view_module-24px.svg";
     } else {
       document.getElementById("gallery").className = "square-gallery";
-      document.getElementById("gridList").innerText = "List";      
+      //document.getElementById("img").src="../../assets/icons/check_box_outline_blank-24px.svg";   
     } 
   }
 }
