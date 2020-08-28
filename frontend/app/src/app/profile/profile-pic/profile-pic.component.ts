@@ -54,7 +54,7 @@ export class ProfilePicComponent implements OnInit {
 
                   if (img_height > max_height || img_width > max_width) {
                       this.imageError =
-                          'Maximum dimentions allowed ' +
+                          'Maximum dimensions allowed ' +
                           max_height +
                           'x' +
                           max_width +
