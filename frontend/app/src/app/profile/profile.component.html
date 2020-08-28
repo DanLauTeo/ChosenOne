@@ -1,12 +1,19 @@
 <app-top-bar></app-top-bar>
-<button (click)="logout()">Logout</button>
-<button id="edit" (click)="edit()">Edit</button>
+
+<button id="logout" (click)="logout()">
+  <img src="../assets/icons/logout-box-line.svg">
+</button>
+
 <div class="aboutUser">
-  <h2 id="username">{{user.username}}</h2>
+  <div>
+    <h2 id="username">{{user.username}}</h2>
+    <button id="edit" (click)="edit()">
+      <img src="../assets/icons/create-24px.svg">
+    </button>
+  </div>
   <div id="profileBody">
-      <img src={{user.profilePic}} id="profilePic" >
-      <p id="bio" > <button id="edit">Edit</button> {{user.bio}} </p>
+    <app-profile-pic></app-profile-pic>
+      <p id="bio" > {{user.bio}} </p>
   </div>
 </div>
 <app-gallery></app-gallery>
-
