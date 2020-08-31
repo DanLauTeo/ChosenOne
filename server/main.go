@@ -15,20 +15,16 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"os"
 
-	"localdev/main/dsclient"
 	"localdev/main/routes"
 
 	"google.golang.org/appengine"
 )
 
 func main() {
-	ctx := context.Background()
-	dsclient.Init(ctx)
 	router := routes.NewRouter()
 
 	if _, local := os.LookupEnv("LOCAL_TESTING"); !local {
