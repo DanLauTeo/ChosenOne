@@ -18,6 +18,7 @@ package routes
 
 import (
 	"net/http"
+
 	"github.com/gorilla/mux"
 )
 
@@ -68,5 +69,23 @@ var apiRoutes = Routes{
 		"GET",
 		"/",
 		CheckDatastore,
+	},
+	Route{
+		"Get login URL",
+		"GET",
+		"/login-url",
+		LoginURL,
+	},
+	Route{
+		"Get logout URL",
+		"GET",
+		"/logout-url",
+		LogoutURL,
+	},
+	Route{
+		"Get current user id",
+		"GET",
+		"/who",
+		Who,
 	},
 }

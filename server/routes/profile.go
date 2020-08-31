@@ -18,8 +18,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"localdev/main/dsclient"
 	"localdev/main/models"
+	"localdev/main/services"
 	"log"
 	"net/http"
 
@@ -31,7 +31,7 @@ import (
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	query := datastore.NewQuery("User")
-	it := dsclient.DsClient().Run(ctx, query)
+	it := services.Locator.DsClient().Run(ctx, query)
 	for {
 		var user models.User
 		_, err := it.Next(&user)
@@ -55,7 +55,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	dsClient := dsclient.DsClient()
+	dsClient := services.Locator.DsClient()
 	vars := mux.Vars(r)
 	userID := vars["id"]
 
@@ -96,7 +96,7 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 
 	//Connect to datastore
 	ctx := r.Context()
-	dsClient := dsclient.DsClient()
+	dsClient := services.Locator.DsClient()
 
 	//Retrieve user from datastore
 	vars := mux.Vars(r)

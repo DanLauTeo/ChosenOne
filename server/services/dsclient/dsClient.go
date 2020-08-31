@@ -22,21 +22,11 @@ import (
 	"cloud.google.com/go/datastore"
 )
 
-var dsClient *datastore.Client
-
-func Init(ctx context.Context) {
-	var err error
-	dsClient, err = datastore.NewClient(ctx, config.Project())
+func NewDatastoreClient(ctx context.Context) *datastore.Client {
+	dsClient, err := datastore.NewClient(ctx, config.Project())
 	if err != nil {
 		log.Fatalf("Cannot connect to DataStore: %v", err)
 	}
-}
 
-func DsClient() *datastore.Client {
-	if dsClient != nil {
-		return dsClient
-	} else {
-		log.Fatal("Datastore client not initialised")
-		return nil
-	}
+	return dsClient
 }
