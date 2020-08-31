@@ -1,32 +1,48 @@
-#presentation{
-    width: 300px;
-    border: 5px solid #31e98c;
-    padding: 50px;
-    margin: 20px;
+#bio{
+  font-size: 1.5vw;
+  width: 90%;
+  padding: 12%;
 }
 
 #profilePic{
-    width: 130px;
-    margin: auto;
-    border-radius: 100%;
+  width: 100%;
+  margin: auto;
+  border-radius: 100%;
+}
+
+#profilePic:hover{
+  opacity: 0.5;
 }
 
 .aboutUser{
-    margin-top: 10%;
-    margin-left: auto;
-    margin-right: auto;
-    width: 650px;
-    clear: both;
+  margin-top: 5%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  clear: both;
+  margin-bottom: 5%;
 }
 
 #profileBody{
-    display: grid;
-    grid-template-columns: auto auto;
-    margin: auto;
-    left: 30%;
-    right: 30%;
+  display: grid;
+  grid-template-columns: auto auto;
+  margin: auto;
+  left: 30%;
+  right: 30%;
 }
 
 h2{
-    color:  #31e98c;
+  color: #31e98c;
+}
+
+button {
+  background-color: white;
+  border: none;
+  opacity: 0.75;
+  margin: 1%;
+
+}
+
+#edit{
+  float:right;
 }

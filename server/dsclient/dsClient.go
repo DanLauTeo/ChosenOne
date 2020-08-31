@@ -12,37 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package dsclient
 
 import (
 	"context"
+	"localdev/main/config"
 	"log"
-	"net/http"
-	"os"
 
-	"localdev/main/dsclient"
-	"localdev/main/routes"
-
-	"google.golang.org/appengine"
+	"cloud.google.com/go/datastore"
 )
 
-func main() {
-	ctx := context.Background()
-	dsclient.Init(ctx)
-	router := routes.NewRouter()
+var dsClient *datastore.Client
 
-	if _, local := os.LookupEnv("LOCAL_TESTING"); !local {
-		http.Handle("/", router)
-		appengine.Main()
+func Init(ctx context.Context) {
+	var err error
+	dsClient, err = datastore.NewClient(ctx, config.Project())
+	if err != nil {
+		log.Fatalf("Cannot connect to DataStore: %v", err)
+	}
+}
+
+func DsClient() *datastore.Client {
+	if dsClient != nil {
+		return dsClient
 	} else {
-		port := os.Getenv("PORT")
-		if port == "" {
-			port = "8080"
-			log.Printf("Defaulting to port %s", port)
-		}
-
-		log.Printf("Listening on port %s", port)
-
-		http.ListenAndServe(":"+port, router)
+		log.Fatal("Datastore client not initialised")
+		return nil
 	}
 }

@@ -1,0 +1,38 @@
+.image-wrap {
+    display: inline-block;
+}
+
+.img-space {
+    border-radius: 8px;
+    height: auto;
+}
+
+.img-space img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: auto;
+    cursor: pointer;
+}
+
+.fileInputProfileWrap {
+    width: 100%;
+    height: auto;
+}
+
+.fileInputProfile {
+    position: absolute;
+    height: 15%;
+    width: 14%;
+    z-index: 99;
+    opacity: 0;
+}
+
+.fileInputProfile[disabled] + .img-space{
+    pointer-events: none;
+    cursor: not-allowed!important;
+}
+
+fieldset {
+    border:none;
+}
