@@ -34,9 +34,14 @@ func init() {
 }
 
 var config = struct {
-	Project string `json:"project"`
+	Project     string `json:"project"`
+	ImageBucket string `json:"image_bucket"`
 }{}
 
 func Project() string {
 	return config.Project
+}
+
+func ImageBucket() string {
+	return config.ImageBucket
 }
