@@ -172,6 +172,85 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProfilePic(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte("called pic"))
+	if r.Method != http.MethodPut {
+		log.Printf("Invalid request method")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Invalid request method"))
+		return
+	}
+
+	//Connect to datastore
+	ctx := r.Context()
+	dsClient := services.Locator.DsClient()
+	//Retrieve user from datastore
+	vars := mux.Vars(r)
+	userID := vars["id"]
+	if len(userID) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no ID provided"))
+		return
+	}
+
+	k := datastore.NameKey("User", userID, nil)
+
+	var user models.User
+	if err := dsClient.Get(ctx, k, &user); err != nil {
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("entity not found"))
+		return
+	}
+
+	//Get request body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Cannot read request body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//Get patch operations from body
+	var bodyMapped []struct {
+		Op    string
+		Path  string
+		Value string
+	}
+	err = json.Unmarshal(body, &bodyMapped)
+	if err != nil {
+		log.Printf("Cannot read patch operations: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//Read through operations and apply valid changes
+	for _, v := range bodyMapped {
+		if v.Op == "replace" {
+			switch v.Path {
+			case "/Name":
+				user.Name = v.Value
+			case "/Bio":
+				user.Bio = v.Value
+			case "/ProfilePic":
+				user.ProfilePic = v.Value
+			}
+		}
+	}
+
+	//Save patched user
+	k, err = dsClient.Put(ctx, k, &user)
+	if err != nil {
+		log.Printf("Cannot save user to DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//Return updated user
+	out, err := json.Marshal(user)
+	if err != nil {
+		log.Printf("Cannot convert user to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
 }

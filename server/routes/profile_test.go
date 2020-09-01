@@ -20,14 +20,19 @@ import (
 	"fmt"
 	"localdev/main/models"
 	"localdev/main/services"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/datastore"
 	jsonpatch "github.com/evanphx/json-patch"
 )
+
+func init() {
+}
 
 func fillDatastore() {
 	ctx := context.Background()
@@ -42,7 +47,6 @@ func fillDatastore() {
 
 func emptyDatastore() {
 	ctx := context.Background()
-	dsClient := services.Locator.DsClient()
 	key := datastore.NameKey("User", "1", nil)
 	if err := dsClient.Delete(ctx, key); err != nil {
 		fmt.Println(err)
@@ -214,23 +218,78 @@ func TestEditProfileMixed(t *testing.T) {
 	emptyDatastore()
 }
 
-func TestProfilePic(t *testing.T) {
-	req, err := http.NewRequest("PUT", "/user/id/profile-image", nil)
+func TestProfilePicValid(t *testing.T) {
+	fillDatastore()
+	fmt.Println(file)
+	fmt.Println(i.image)
+
+	req, err := http.NewRequest("PUT", "/user/1/profile-image", file)
 	if err != nil {
 		t.Fatal(err)
 	}
 	rr := httptest.NewRecorder()
 	handler := NewRouter()
 	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusAccepted {
+	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v",
-			status, http.StatusAccepted)
+			status, http.StatusOK)
 	}
 
 	// Check the response body is what we expect.
-	expected := `called pic`
+	u := models.User{"User One", "1", i.image, "User One's Bio", "album", nil, nil}
+	expected, _ := json.Marshal(u)
+	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), string(expected))
+	}
+	emptyDatastore()
+}
+
+func TestProfilePicInvalidType(t *testing.T) {
+	fillDatastore()
+	fmt.Println(file)
+	fmt.Println(i.image)
+
+	req, err := http.NewRequest("PUT", "/user/1/profile-image", file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewRouter()
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expected := "Invalid image format"
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body.String(), expected)
+			rr.Body.String(), string(expected))
 	}
+	emptyDatastore()
+}
+
+func TestProfilePicEmpty(t *testing.T) {
+	fillDatastore()
+	req, err := http.NewRequest("PUT", "/user/1/profile-image", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := NewRouter()
+	handler.ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expected := "Request body empty"
+	if rr.Body.String() != expected {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), string(expected))
+	}
+	emptyDatastore()
 }
