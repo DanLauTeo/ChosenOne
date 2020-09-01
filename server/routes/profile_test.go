@@ -18,8 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"localdev/main/dsclient"
 	"localdev/main/models"
+	"localdev/main/services"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -29,14 +29,9 @@ import (
 	jsonpatch "github.com/evanphx/json-patch"
 )
 
-func init() {
-	ctx := context.Background()
-	dsclient.Init(ctx)
-}
-
 func fillDatastore() {
 	ctx := context.Background()
-	dsClient := dsclient.DsClient()
+	dsClient := services.Locator.DsClient()
 	u := models.User{"User One", "1", "img", "User One's Bio", "album", nil, nil}
 	key := datastore.NameKey("User", u.ID, nil)
 	key, err := dsClient.Put(ctx, key, &u)
@@ -47,7 +42,7 @@ func fillDatastore() {
 
 func emptyDatastore() {
 	ctx := context.Background()
-	dsClient := dsclient.DsClient()
+	dsClient := services.Locator.DsClient()
 	key := datastore.NameKey("User", "1", nil)
 	if err := dsClient.Delete(ctx, key); err != nil {
 		fmt.Println(err)

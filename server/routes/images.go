@@ -17,12 +17,14 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
+	vision "cloud.google.com/go/vision/apiv1"
 )
 
 func serveError(ctx context.Context, w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprintf(w, "Internal Server Error: %s", err)
+	fmt.Fprint(w, "Internal Server Error")
+	log.Errorf(ctx, "%v", err)
 }
 
 var rootTemplate = template.Must(template.New("root").Parse(rootTemplateHTML))
@@ -63,11 +65,19 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 
 	defer file.Close()
 
+	labels, err := getImageLabels(ctx, file)
+
+	if err != nil {
+		serveError(ctx, w, err)
+		return
+	}
+
 	dsClient := services.Locator.DsClient()
 
 	key := datastore.IncompleteKey("Image", nil)
 	entity := new(models.Image)
 	entity.Type = "user_uploaded_image"
+	entity.Labels = labels
 
 	entity.Key, err = dsClient.Put(ctx, key, entity)
 
@@ -104,6 +114,8 @@ func gcsUpload(ctx context.Context, client *storage.Client, file multipart.File,
 
 	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
 
+	file.Seek(0, 0)
+
 	if _, err := io.Copy(wc, file); err != nil {
 		return err
 	}
@@ -113,4 +125,35 @@ func gcsUpload(ctx context.Context, client *storage.Client, file multipart.File,
 	}
 
 	return nil
+}
+
+func getImageLabels(ctx context.Context, file multipart.File) ([]models.LabelWithScore, error) {
+
+	client, err := vision.NewImageAnnotatorClient(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer client.Close()
+
+	image, err := vision.NewImageFromReader(file)
+
+	if err != nil {
+		return nil, err
+	}
+
+	labels, err := client.DetectLabels(ctx, image, nil, 10)
+
+	if err != nil {
+		return nil, err
+	}
+
+	labelsWithScore := make([]models.LabelWithScore, len(labels))
+
+	for i, label := range labels {
+		labelsWithScore[i] = models.LabelWithScore{label.Description, label.Score}
+	}
+
+	return labelsWithScore, nil
 }
