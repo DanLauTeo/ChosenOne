@@ -51,6 +51,16 @@ func ImageUploadPage(w http.ResponseWriter, r *http.Request) {
 
 func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
+
+	userService := services.Locator.UserService()
+
+	userID := userService.GetCurrentUserID(ctx)
+
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	file, _, err := r.FormFile("file")
 
 	if err != nil {
@@ -74,6 +84,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	key := datastore.IncompleteKey("Image", nil)
 	entity := new(models.Image)
 	entity.Type = "user_uploaded_image"
+	entity.OwnerID = userID
 	entity.Labels = labels
 
 	entity.Key, err = dsClient.Put(ctx, key, entity)

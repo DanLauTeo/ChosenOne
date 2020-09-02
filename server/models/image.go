@@ -7,9 +7,10 @@ import (
 )
 
 type Image struct {
-	Key    *datastore.Key   `datastore:"__key__"`
-	Type   string           `datastore:"type"`
-	Labels []LabelWithScore `datastore:"labels"`
+	Key     *datastore.Key   `datastore:"__key__"`
+	Type    string           `datastore:"type"`
+	OwnerID string           `datastore:"owner_id"`
+	Labels  []LabelWithScore `datastore:"labels"`
 }
 
 type LabelWithScore struct {
