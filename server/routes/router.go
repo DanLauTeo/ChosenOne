@@ -100,4 +100,10 @@ var apiRoutes = Routes{
 		"/image-uploaded/",
 		HandleImageUpload,
 	},
+	Route{
+		"Get chatrooms from user",
+		"GET",
+		"/messages",
+		GetChatRooms,
+	},
 }
