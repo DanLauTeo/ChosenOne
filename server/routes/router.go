@@ -88,4 +88,16 @@ var apiRoutes = Routes{
 		"/who",
 		Who,
 	},
+	Route{
+		"Upload page",
+		"GET",
+		"/upload/",
+		ImageUploadPage,
+	},
+	Route{
+		"Handle upload",
+		"POST",
+		"/image-uploaded/",
+		HandleImageUpload,
+	},
 }
