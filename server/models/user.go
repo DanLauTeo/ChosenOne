@@ -15,6 +15,8 @@
 /*Contains the User struct, as well as any methods*/
 package models
 
+import "cloud.google.com/go/datastore"
+
 //All strings for now, type will be changed as project develops
 type User struct {
 	Name              string
@@ -22,6 +24,6 @@ type User struct {
 	ProfilePic        string
 	Bio               string
 	AlbumName         string
-	Conversations     []string
+	Chatrooms         []*datastore.Key
 	InterestSignature []string
 }
