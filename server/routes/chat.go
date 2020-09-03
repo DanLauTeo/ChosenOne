@@ -115,9 +115,9 @@ func GetChatRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chatrooms := make([]models.ChatRoom, len(user.Conversations))
+	chatrooms := make([]models.ChatRoom, len(user.Chatrooms))
 
-	if err := dsClient.GetMulti(ctx, user.Conversations, chatrooms); err != nil {
+	if err := dsClient.GetMulti(ctx, user.Chatrooms, chatrooms); err != nil {
 		log.Printf("Cannot retrieve chatrooms from DataStore: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
