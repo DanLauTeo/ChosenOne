@@ -107,3 +107,13 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, imageURL, http.StatusFound)
 }
+
+func RemoveImageByURL(ctx context.Context, imageURL string) {
+	bucket := config.ImageBucket()
+
+	image := imageURL[len("https://storage.cloud.google.com//"+bucket):]
+
+	storageClient := services.Locator.StorageClient()
+
+	storageClient.Delete(ctx, bucket, image)
+}

@@ -207,7 +207,7 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	//Get new pic from request
 	rr := httptest.NewRecorder()
 	HandleImageUpload(rr, r)
-	fmt.Println(rr)
+	user.ProfilePic = rr.HeaderMap.Get("Location")
 
 	//Update user
 	k, err := dsClient.Put(ctx, k, &user)
@@ -218,7 +218,7 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Delete old pic
-	fmt.Println(oldPic)
+	RemoveImageByURL(ctx, oldPic)
 
 	//Return updated user
 	out, err := json.Marshal(user)
