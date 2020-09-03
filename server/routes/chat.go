@@ -83,5 +83,53 @@ func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(out))	
+	w.Write([]byte(out))
+}
+
+func GetChatRooms(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	dsClient := services.Locator.DsClient()
+
+	userService := services.Locator.UserService()
+
+	userID := userService.GetCurrentUserID(ctx)
+
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if len(userID) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no ID provided"))
+		return
+	}
+
+	k := datastore.NameKey("User", userID, nil)
+
+	var user models.User
+	if err := dsClient.Get(ctx, k, &user); err != nil {
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("entity not found"))
+		return
+	}
+
+	chatrooms := make([]models.ChatRoom, len(user.Conversations))
+
+	if err := dsClient.GetMulti(ctx, user.Conversations, chatrooms); err != nil {
+		log.Printf("Cannot retrieve chatrooms from DataStore: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("entity not found"))
+		return
+	}
+
+	out, err := json.Marshal(chatrooms)
+	if err != nil {
+		log.Printf("Cannot convert Chatrooms to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
 }

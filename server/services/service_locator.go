@@ -3,31 +3,44 @@ package services
 import (
 	"context"
 	"localdev/main/services/dsclient"
-	"log"
+	sc "localdev/main/services/storageClient"
+	vc "localdev/main/services/visionClient"
 	"os"
 
 	"cloud.google.com/go/datastore"
 )
 
-type ServiceLocator struct{}
+type ServiceLocator interface {
+	UserService() UserService
+	DsClient() *datastore.Client
+	StorageClient() sc.StorageClient
+	VisionClient() vc.VisionClient
+}
 
-func (_ *ServiceLocator) UserService() UserService {
+type DefaultServiceLocator struct{}
+
+func (_ *DefaultServiceLocator) UserService() UserService {
 	return userService
 }
 
-func (_ *ServiceLocator) DsClient() *datastore.Client {
-	if dsClient != nil {
-		return dsClient
-	} else {
-		log.Fatal("Datastore client not initialised")
-		return nil
-	}
+func (_ *DefaultServiceLocator) DsClient() *datastore.Client {
+	return dsClient
+}
+
+func (_ *DefaultServiceLocator) StorageClient() sc.StorageClient {
+	return storageClient
+}
+
+func (_ *DefaultServiceLocator) VisionClient() vc.VisionClient {
+	return visionClient
 }
 
 var (
-	Locator     ServiceLocator = ServiceLocator{}
-	userService UserService
-	dsClient    *datastore.Client
+	Locator       ServiceLocator = &DefaultServiceLocator{}
+	userService   UserService
+	dsClient      *datastore.Client
+	storageClient sc.StorageClient
+	visionClient  vc.VisionClient
 )
 
 func init() {
@@ -39,5 +52,11 @@ func init() {
 		userService = &UserAPIUserService{}
 	}
 
-	dsClient = dsclient.NewDatastoreClient(context.Background())
+	ctx := context.Background()
+
+	dsClient = dsclient.NewDatastoreClient(ctx)
+
+	storageClient = sc.NewGCStorageClient(ctx)
+
+	visionClient = vc.NewGCVisionClient(ctx)
 }
