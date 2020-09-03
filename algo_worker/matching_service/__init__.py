@@ -5,9 +5,9 @@ class MatchingService:
 
     @classmethod
     async def create(cls):
-        self = MatchingService()
-        await self.recalc_scann()
-        return self
+        service = MatchingService()
+        await service.recalc_scann()
+        return service
 
     def get_matches(self, user_id):
         return self.scann_matcher.get_matches(user_id)

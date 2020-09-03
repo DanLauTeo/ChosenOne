@@ -2,9 +2,9 @@ class ScannMatcher:
 
     @classmethod
     async def create(cls):
-        self = ScannMatcher()
+        matcher = ScannMatcher()
         # TODO: download image data, calculate user interest signatures, create ScaNN
-        return self
+        return matcher
 
     def get_matches(self, user_id):
         # this is a stub
