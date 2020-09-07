@@ -17,7 +17,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-	"context"
+	//"context"
 	//"io/ioutil"
 	"localdev/main/models"
 	"localdev/main/services"
@@ -27,10 +27,11 @@ import (
 	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
 	"google.golang.org/api/iterator"
+	"google.golang.org/appengine"
 )
 
 func CheckChatDatastore(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	ctx := appengine.NewContext(r)
 	query := datastore.NewQuery("Chat")
 	it := services.Locator.DsClient().Run(ctx, query)
 	for {
@@ -50,14 +51,7 @@ func CheckChatDatastore(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		log.Printf("Invalid request method")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Invalid request method"))
-		return
-	}
-
-	ctx := r.Context()
+	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
 	vars := mux.Vars(r)
 	chat_roomID := vars["chat_roomID"]
@@ -76,9 +70,9 @@ func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if chat_room.Participants[0] != userID && chat_room.Participants[1] != userID {
+	if userInList(userID, chat_room.Participants) {
 		log.Printf("User not participant of chatroom")
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("User not participant of chatroom"))
 		return
 	}
@@ -99,7 +93,7 @@ func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetChatRooms(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
 
 	userService := services.Locator.UserService()
@@ -146,50 +140,11 @@ func GetChatRooms(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(out))
 }
 
-func CreateChatRoom(id string, requestedUserID string) {
-	ctx := context.Background()
-	dsClient := services.Locator.DsClient()
-	userService := services.Locator.UserService()
-	userID := userService.GetCurrentUserID(ctx)
-
-	participants := []string{userID, requestedUserID}
-	cr := models.ChatRoom{ id, participants, nil}
-	chatRoomKey := datastore.IncompleteKey("ChatRoom", nil)
-	_, err := dsClient.Put(ctx, chatRoomKey, &cr)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	//add chatroomKey to CurrentUser.ChatRooms
-	k1 := datastore.NameKey("User", userID, nil)
-
-	var currentUser models.User
-	if err := dsClient.Get(ctx, k1, &currentUser); err != nil {
-		log.Printf("Cannot retrieve user from DataStore: %v", err)
-		return
-	}
-
-	currentUser.Chatrooms = append(currentUser.Chatrooms, chatRoomKey)
-
-	k1, err = dsClient.Put(ctx, k1, &currentUser)
-	if err != nil {
-		log.Printf("Cannot save user to DataStore: %v", err)
-		return
-	}
-	// add chatroomid to RequestedUser.ChatRooms
-	k2 := datastore.NameKey("User", requestedUserID, nil)
-
-	var requestedUser models.User
-	if err := dsClient.Get(ctx, k2, &requestedUser); err != nil {
-		log.Printf("Cannot retrieve user from DataStore: %v", err)
-		return
-	}
-
-	requestedUser.Chatrooms = append(requestedUser.Chatrooms, chatRoomKey)
-
-	k2, err = dsClient.Put(ctx, k2, &currentUser)
-	if err != nil {
-		log.Printf("Cannot save user to DataStore: %v", err)
-		return
-	}
+func userInList(a string, list []string) bool {
+    for _, b := range list {
+        if b == a {
+            return true
+        }
+    }
+    return false
 }
