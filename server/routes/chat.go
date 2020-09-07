@@ -116,7 +116,7 @@ func GetChatRooms(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	if err := dsClient.Get(ctx, k, &user); err != nil {
 		log.Printf("Cannot retrieve user from DataStore: %v", err)
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusRequestTimeout)
 		w.Write([]byte("entity not found"))
 		return
 	}
@@ -125,7 +125,7 @@ func GetChatRooms(w http.ResponseWriter, r *http.Request) {
 
 	if err := dsClient.GetMulti(ctx, user.Chatrooms, chatrooms); err != nil {
 		log.Printf("Cannot retrieve chatrooms from DataStore: %v", err)
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusRequestTimeout)
 		w.Write([]byte("entity not found"))
 		return
 	}
@@ -148,3 +148,4 @@ func userInList(a string, list []string) bool {
     }
     return false
 }
+
