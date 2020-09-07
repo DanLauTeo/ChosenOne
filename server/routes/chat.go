@@ -17,7 +17,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
-
+	"context"
 	//"io/ioutil"
 	"localdev/main/models"
 	"localdev/main/services"
@@ -144,4 +144,52 @@ func GetChatRooms(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(out))
+}
+
+func CreateChatRoom(id string, requestedUserID string) {
+	ctx := context.Background()
+	dsClient := services.Locator.DsClient()
+	userService := services.Locator.UserService()
+	userID := userService.GetCurrentUserID(ctx)
+
+	participants := []string{userID, requestedUserID}
+	cr := models.ChatRoom{ id, participants, nil}
+	chatRoomKey := datastore.IncompleteKey("ChatRoom", nil)
+	_, err := dsClient.Put(ctx, chatRoomKey, &cr)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//add chatroomKey to CurrentUser.ChatRooms
+	k1 := datastore.NameKey("User", userID, nil)
+
+	var currentUser models.User
+	if err := dsClient.Get(ctx, k1, &currentUser); err != nil {
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		return
+	}
+
+	currentUser.Chatrooms = append(currentUser.Chatrooms, chatRoomKey)
+
+	k1, err = dsClient.Put(ctx, k1, &currentUser)
+	if err != nil {
+		log.Printf("Cannot save user to DataStore: %v", err)
+		return
+	}
+	// add chatroomid to RequestedUser.ChatRooms
+	k2 := datastore.NameKey("User", requestedUserID, nil)
+
+	var requestedUser models.User
+	if err := dsClient.Get(ctx, k2, &requestedUser); err != nil {
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		return
+	}
+
+	requestedUser.Chatrooms = append(requestedUser.Chatrooms, chatRoomKey)
+
+	k2, err = dsClient.Put(ctx, k2, &currentUser)
+	if err != nil {
+		log.Printf("Cannot save user to DataStore: %v", err)
+		return
+	}
 }
