@@ -17,6 +17,7 @@ package routes
 import (
 	"encoding/json"
 	"fmt"
+
 	//"io/ioutil"
 	"localdev/main/models"
 	"localdev/main/services"
@@ -39,14 +40,16 @@ func CheckChatDatastore(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if err != nil {
-			log.Fatalf("Error fetching next task: %v", err)
+			log.Printf("Error fetching next chatroom: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
-		fmt.Fprintf(w, "Chat %q, ID %q\n", chat_room.Name, chat_room.Messages)
+		fmt.Fprintf(w, "ChatRoom %q, Messages %q\n", chat_room.ID, chat_room.Messages)
 	}
 	w.Write([]byte("done"))
 }
 
-func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request){
+func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		log.Printf("Invalid request method")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -59,31 +62,40 @@ func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request){
 	vars := mux.Vars(r)
 	chat_roomID := vars["chat_roomID"]
 
+	userService := services.Locator.UserService()
+	userID := userService.GetCurrentUserID(ctx)
+
 	k := datastore.NameKey("ChatRoom", chat_roomID, nil)
 
 	var chat_room models.ChatRoom
 
 	if err := dsClient.Get(ctx, k, &chat_room); err != nil {
-		log.Printf("Cannot retrieve user from DataStore: %v", err)
+		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
 		return
 	}
 
-	var messages[] models.Message
+	if chat_room.Participants[0] != userID && chat_room.Participants[1] != userID {
+		log.Printf("User not participant of chatroom")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("User not participant of chatroom"))
+		return
+	}
+
+	messages := make([]models.Message, len(chat_room.Messages)) //Will be max 100 messages
 	err := dsClient.GetMulti(ctx, chat_room.Messages, messages)
 	if err != nil {
 		log.Printf("Cannot get messages: %v", err)
 	}
 
-	out, err := json.Marshal(messages)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(messages)
 	if err != nil {
 		log.Printf("Cannot convert Message to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(out))
 }
 
 func GetChatRooms(w http.ResponseWriter, r *http.Request) {
@@ -115,9 +127,9 @@ func GetChatRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chatrooms := make([]models.ChatRoom, len(user.Conversations))
+	chatrooms := make([]models.ChatRoom, len(user.Chatrooms))
 
-	if err := dsClient.GetMulti(ctx, user.Conversations, chatrooms); err != nil {
+	if err := dsClient.GetMulti(ctx, user.Chatrooms, chatrooms); err != nil {
 		log.Printf("Cannot retrieve chatrooms from DataStore: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
