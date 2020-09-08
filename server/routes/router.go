@@ -100,4 +100,10 @@ var apiRoutes = Routes{
 		"/image-uploaded/",
 		HandleImageUpload,
 	},
+	Route{
+		"Handle image delete",
+		"DELETE",
+		"/images/{imageID}",
+		HandleImageDelete,
+	},
 }
