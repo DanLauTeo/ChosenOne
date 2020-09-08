@@ -112,4 +112,10 @@ var apiRoutes = Routes{
 		"/messages/{chat_roomID}",
 		GetMessagesFromChatRoom,
 	},
+	Route{
+		"Handle image delete",
+		"DELETE",
+		"/images/{imageID}",
+		HandleImageDelete,
+	},
 }

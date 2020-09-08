@@ -18,15 +18,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"localdev/main/config"
 	"localdev/main/models"
 	"localdev/main/services"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 
 	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
 	"google.golang.org/api/iterator"
+	"google.golang.org/appengine"
 )
 
 func CheckDatastore(w http.ResponseWriter, r *http.Request) {
@@ -88,23 +91,23 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditProfile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		log.Printf("Invalid request method")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Invalid request method"))
-		return
-	}
-
 	//Connect to datastore
-	ctx := r.Context()
+	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
 
 	//Retrieve user from datastore
 	vars := mux.Vars(r)
-	userID := vars["id"]
+	paramID := vars["id"]
+	userService := services.Locator.UserService()
+	userID := userService.GetCurrentUserID(ctx)
 	if len(userID) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no ID provided"))
+		return
+	}
+	if userID != paramID {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("User ID doesn't match"))
 		return
 	}
 
@@ -171,23 +174,23 @@ func EditProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProfilePic(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		log.Printf("Invalid request method")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Invalid request method"))
-		return
-	}
-
 	//Connect to datastore
-	ctx := r.Context()
+	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
 
 	//Retrieve user from datastore
 	vars := mux.Vars(r)
-	userID := vars["id"]
+	paramID := vars["id"]
+	userService := services.Locator.UserService()
+	userID := userService.GetCurrentUserID(ctx)
 	if len(userID) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("no ID provided"))
+		return
+	}
+	if userID != paramID {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("User ID doesn't match"))
 		return
 	}
 
@@ -218,7 +221,18 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Delete old pic
-	RemoveImageByURL(ctx, oldPic)
+	bucket := config.ImageBucket()
+	image := oldPic[len("https://storage.cloud.google.com//"+bucket):]
+	webURL := os.Getenv("WEBURL")
+	client := &http.Client{}
+	req, err := http.NewRequest("DELETE", webURL+"/images/"+image, nil)
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	if err != nil {
+		log.Printf("Failure deleting image: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	//Return updated user
 	out, err := json.Marshal(user)
