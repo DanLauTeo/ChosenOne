@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+service Matcher {
+    rpc GetMatches(GetMatchesRequest) returns (GetMatchesReply) {}
+}
+
+message GetMatchesRequest {
+    string user_id = 1;
+}
+
+message GetMatchesReply {
+    repeated string user_ids = 1;
+}
