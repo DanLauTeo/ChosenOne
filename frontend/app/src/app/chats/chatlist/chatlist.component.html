@@ -1,0 +1,10 @@
+<mat-card class="chatlist">
+<mat-list>
+   <h3 mat-subheader>Chats</h3>
+   <mat-list-item *ngFor="let chatroom of chatrooms; last as last" (click)="openChat(chatroom.id)">
+      <h4 mat-line>Fake username</h4>
+      <p mat-line> Most recent message preview </p>
+      <mat-divider *ngIf="!last"></mat-divider>
+   </mat-list-item>
+</mat-list>
+</mat-card>

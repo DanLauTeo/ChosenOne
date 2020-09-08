@@ -1,0 +1,16 @@
+
+<mat-list>
+    <h1 mat-subheader>{{chatroomName}}</h1>
+    <mat-list-item *ngFor="let message of messages; last as last">
+       <h4 mat-line>{{message.senderID}}</h4>
+       <p mat-line>{{message.body}}</p>
+       <mat-divider *ngIf="!last"></mat-divider>
+    </mat-list-item>
+ </mat-list>
+ <div class="message">
+     <input matInput class="message-box" #inputbox (keyup.enter)="sendMessage(inputbox.value);inputbox.value='' " placeholder="Enter message">
+   <button mat-icon-button aria-label="Send" (click)="sendMessage(inputbox.value);inputbox.value=''">
+      <mat-icon>send</mat-icon>
+    </button>
+ </div>
+
