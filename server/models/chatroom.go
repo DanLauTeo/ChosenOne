@@ -18,12 +18,8 @@ package models
 import "cloud.google.com/go/datastore"
 
 //All strings for now, type will be changed as project develops
-type User struct {
-	Name              string
-	ID                string
-	ProfilePic        string
-	Bio               string
-	AlbumName         string
-	Chatrooms         []*datastore.Key
-	InterestSignature []string
+type ChatRoom struct {
+	ID           string
+	Participants []string
+	Messages     []*datastore.Key
 }

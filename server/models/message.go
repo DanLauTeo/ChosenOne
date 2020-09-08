@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*Contains the User struct, as well as any methods*/
+/*Contains the message struct, as well as any methods*/
 package models
 
-import "cloud.google.com/go/datastore"
+import "time"
 
 //All strings for now, type will be changed as project develops
-type User struct {
-	Name              string
-	ID                string
-	ProfilePic        string
-	Bio               string
-	AlbumName         string
-	Chatrooms         []*datastore.Key
-	InterestSignature []string
+type Message struct {
+	SenderID string
+	Body     string
+	Posted   time.Time
 }
