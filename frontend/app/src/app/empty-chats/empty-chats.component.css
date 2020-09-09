@@ -1,9 +1,9 @@
-
 app-chatlist {
     width: 30%;
     float: left;
 }
-app-messages {
+
+welcome-message {
     width: 70%;
     float: right;
 }
