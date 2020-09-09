@@ -176,7 +176,6 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	if err := dsClient.Get(ctx, k1, &currentUser); err != nil {
 		log.Printf("Cannot update user: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Cannot retrieve user from DataStore: %v", err)
 		return
 	}
 	
@@ -186,7 +185,6 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Cannot update user: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Cannot save user to DataStore: %v", err)
 		return
 	}
 	// add chatroomid to RequestedUser.ChatRooms
@@ -206,7 +204,6 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Cannot update user: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Cannot save user to DataStore: %v", err)
 		return
 	}
 }
@@ -246,6 +243,16 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
+		return
+	}
+
+	userService := services.Locator.UserService()
+	userID := userService.GetCurrentUserID(ctx)
+
+	if userInList(userID, chatroom.Participants) {
+		log.Printf("User not participant of chatroom")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("User not participant of chatroom"))
 		return
 	}
 	
@@ -299,6 +306,16 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
+		return
+	}
+
+	userService := services.Locator.UserService()
+	userID := userService.GetCurrentUserID(ctx)
+
+	if userInList(userID, chatroom.Participants) {
+		log.Printf("User not participant of chatroom")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("User not participant of chatroom"))
 		return
 	}
 
