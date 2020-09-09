@@ -32,7 +32,7 @@ import (
 
 func CheckChatDatastore(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-	query := datastore.NewQuery("Chat")
+	query := datastore.NewQuery("ChatRoom")
 	it := services.Locator.DsClient().Run(ctx, query)
 	for {
 		var chatroom models.ChatRoom
@@ -161,9 +161,12 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	cr := models.ChatRoom{ id, participants, nil}
 	
 	chatroomKey := datastore.NameKey("ChatRoom", cr.ID, nil)
-	_, err1 := dsClient.Put(ctx, chatroomKey, &cr)
-	if err1 != nil {
+	_, err := dsClient.Put(ctx, chatroomKey, &cr)
+	if err != nil {
 		fmt.Println(err)
+		log.Printf("Cannot create new chat room: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	
 	//add chatroomKey to CurrentUser.ChatRooms
@@ -171,6 +174,8 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	
 	var currentUser models.User
 	if err := dsClient.Get(ctx, k1, &currentUser); err != nil {
+		log.Printf("Cannot update user: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("Cannot retrieve user from DataStore: %v", err)
 		return
 	}
@@ -179,6 +184,8 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	
 	k1, err = dsClient.Put(ctx, k1, &currentUser)
 	if err != nil {
+		log.Printf("Cannot update user: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("Cannot save user to DataStore: %v", err)
 		return
 	}
@@ -187,6 +194,8 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	
 	var requestedUser models.User
 	if err := dsClient.Get(ctx, k2, &requestedUser); err != nil {
+		log.Printf("Cannot retrive user from datastore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("Cannot retrieve user from DataStore: %v", err)
 		return
 	}
@@ -195,6 +204,8 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	
 	k2, err = dsClient.Put(ctx, k2, &currentUser)
 	if err != nil {
+		log.Printf("Cannot update user: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Printf("Cannot save user to DataStore: %v", err)
 		return
 	}
