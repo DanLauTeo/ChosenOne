@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,6 +12,8 @@ import { FeedComponent } from './feed/feed.component';
 import { ChatsComponent } from './chats/chats.component';
 import { GetMatchedComponent } from './get-matched/get-matched.component';
 import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component';
+
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
@@ -27,7 +30,9 @@ import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule,
+    MatIconModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

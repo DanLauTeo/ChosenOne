@@ -19,11 +19,11 @@ import "cloud.google.com/go/datastore"
 
 //All strings for now, type will be changed as project develops
 type User struct {
-	Name              string
-	ID                string
-	ProfilePic        string
-	Bio               string
-	AlbumName         string
-	Chatrooms         []*datastore.Key
-	InterestSignature []string
+	Name              string           `json:"username"`
+	ID                string           `json:"id"`
+	ProfilePic        string           `json:"profilePic"`
+	Bio               string           `json:"bio"`
+	AlbumName         string           `json:"token"`
+	Chatrooms         []*datastore.Key `json:"convIDs"`
+	InterestSignature []string         `json:"interestSign"`
 }
