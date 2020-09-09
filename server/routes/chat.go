@@ -161,7 +161,7 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 	cr := models.ChatRoom{ id, participants, nil}
 	
 	chatroomKey := datastore.NameKey("ChatRoom", cr.ID, nil)
-	_, err := dsClient.Put(ctx, chatroomKey, &cr)
+	_, err = dsClient.Put(ctx, chatroomKey, &cr)
 	if err != nil {
 		fmt.Println(err)
 		log.Printf("Cannot create new chat room: %v", err)
