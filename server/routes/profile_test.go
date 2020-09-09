@@ -51,6 +51,7 @@ func emptyDatastore() {
 	if err := dsClient.Delete(ctx, key); err != nil {
 		fmt.Println(err)
 	}
+	fillChatDatastore()
 }
 
 func TestGetProfileValid(t *testing.T) {
