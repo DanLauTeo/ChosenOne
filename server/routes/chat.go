@@ -156,11 +156,10 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	requestedUserID := string(bodyBytes)
-	id := userID + " " + requestedUserID
 	participants := []string{userID, requestedUserID}
-	cr := models.ChatRoom{ id, participants, nil}
 	
-	chatroomKey := datastore.NameKey("ChatRoom", cr.ID, nil)
+	chatroomKey := datastore.IncompleteKey("ChatRoom", nil)
+	cr := models.ChatRoom{chatroomKey, participants, nil}
 	_, err = dsClient.Put(ctx, chatroomKey, &cr)
 	if err != nil {
 		fmt.Println(err)

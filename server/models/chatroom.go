@@ -19,7 +19,7 @@ import "cloud.google.com/go/datastore"
 
 //All strings for now, type will be changed as project develops
 type ChatRoom struct {
-	ID           string
+	ID           *datastore.Key
 	Participants []string
 	Messages     []*datastore.Key
 }
