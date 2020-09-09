@@ -6,6 +6,7 @@ import (
 	"localdev/main/config"
 	"localdev/main/models"
 	"localdev/main/services"
+	"mime/multipart"
 	"net/http"
 	"text/template"
 
@@ -80,27 +81,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dsClient := services.Locator.DsClient()
-
-	key := datastore.IncompleteKey("Image", nil)
-	entity := new(models.Image)
-	entity.Type = "user_uploaded_image"
-	entity.OwnerID = userID
-	entity.Labels = labels
-
-	entity.Key, err = dsClient.Put(ctx, key, entity)
-
-	if err != nil {
-		serveError(ctx, w, err)
-		return
-	}
-
-	bucket := config.ImageBucket()
-	object := entity.GCSObjectID()
-
-	storageClient := services.Locator.StorageClient()
-
-	imageURL, err := storageClient.Upload(ctx, file, bucket, object)
+	imageURL, err := UploadImage(ctx, userID, "user_uploaded_image", labels, file)
 	if err != nil {
 		serveError(ctx, w, err)
 		return
@@ -110,6 +91,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleImageDelete(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Called Delete")
 	ctx := appengine.NewContext(r)
 
 	userService := services.Locator.UserService()
@@ -121,18 +103,76 @@ func HandleImageDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Delete from GCS
+	fmt.Println("Delete GCS")
 	bucket := config.ImageBucket()
 
 	vars := mux.Vars(r)
-	image := vars["imageID"]
+	imageID := vars["imageID"]
 
 	storageClient := services.Locator.StorageClient()
 
-	err := storageClient.Delete(ctx, bucket, image)
+	err := storageClient.Delete(ctx, bucket, imageID)
 	if err != nil {
 		serveError(ctx, w, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Success"))
+
+	//Delete from datastore
+	fmt.Println("Delete Datastore")
+	//Get key from body
+	dsClient := services.Locator.DsClient()
+	imageID = imageID[len("image_"):]
+	key := datastore.NameKey("Image", imageID, nil)
+
+	//Get image from datastore
+	var image models.Image
+	if err := dsClient.Get(ctx, key, &image); err != nil {
+		serveError(ctx, w, err)
+		return
+	}
+
+	//Check owner IDs match
+	if image.OwnerID != userID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	//Delete
+	if err := dsClient.Delete(ctx, key); err != nil {
+		serveError(ctx, w, err)
+		return
+	}
+	fmt.Println("End")
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func UploadImage(ctx context.Context, user_id, image_type string, labels []models.LabelWithScore, file multipart.File) (string, error) {
+	dsClient := services.Locator.DsClient()
+
+	key := datastore.IncompleteKey("Image", nil)
+	entity := new(models.Image)
+	entity.Type = image_type
+	entity.OwnerID = user_id
+	entity.Labels = labels
+
+	var err error
+
+	entity.Key, err = dsClient.Put(ctx, key, entity)
+
+	if err != nil {
+		return "", err
+	}
+
+	bucket := config.ImageBucket()
+	object := entity.GCSObjectID()
+
+	storageClient := services.Locator.StorageClient()
+
+	imageURL, err := storageClient.Upload(ctx, file, bucket, object)
+	if err != nil {
+		return "", err
+	}
+
+	return imageURL, nil
 }
