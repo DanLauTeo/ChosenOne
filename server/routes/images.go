@@ -2,12 +2,14 @@ package routes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"localdev/main/config"
 	"localdev/main/models"
 	"localdev/main/services"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/gorilla/mux"
@@ -91,7 +93,6 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleImageDelete(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Called Delete")
 	ctx := appengine.NewContext(r)
 
 	userService := services.Locator.UserService()
@@ -103,48 +104,53 @@ func HandleImageDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Delete from GCS
-	fmt.Println("Delete GCS")
-	bucket := config.ImageBucket()
-
+	//Delete
 	vars := mux.Vars(r)
 	imageID := vars["imageID"]
 
-	storageClient := services.Locator.StorageClient()
-
-	err := storageClient.Delete(ctx, bucket, imageID)
+	err := DeleteImage(ctx, imageID, userID)
 	if err != nil {
 		serveError(ctx, w, err)
 		return
 	}
 
-	//Delete from datastore
-	fmt.Println("Delete Datastore")
-	//Get key from body
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func DeleteImage(ctx context.Context, imageID, userID string) error {
+	bucket := config.ImageBucket()
+	storageClient := services.Locator.StorageClient()
 	dsClient := services.Locator.DsClient()
-	imageID = imageID[len("image_"):]
-	key := datastore.NameKey("Image", imageID, nil)
+
+	//Delete from datastore
+	//Get key from body
+	n, err := strconv.ParseInt(imageID, 10, 64)
+	key := datastore.IDKey("Image", n, nil)
 
 	//Get image from datastore
 	var image models.Image
 	if err := dsClient.Get(ctx, key, &image); err != nil {
-		serveError(ctx, w, err)
-		return
+		return err
 	}
 
 	//Check owner IDs match
 	if image.OwnerID != userID {
-		w.WriteHeader(http.StatusForbidden)
-		return
+		err := errors.New("User is not image owner")
+		return err
 	}
 
 	//Delete
 	if err := dsClient.Delete(ctx, key); err != nil {
-		serveError(ctx, w, err)
-		return
+		return err
 	}
-	fmt.Println("End")
-	w.WriteHeader(http.StatusNoContent)
+
+	//Delete from GCS
+	imageID = "image_" + imageID
+	err = storageClient.Delete(ctx, bucket, imageID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func UploadImage(ctx context.Context, user_id, image_type string, labels []models.LabelWithScore, file multipart.File) (string, error) {

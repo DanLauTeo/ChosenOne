@@ -23,7 +23,6 @@ import (
 	"localdev/main/services"
 	"log"
 	"net/http"
-	"os"
 
 	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
@@ -234,18 +233,14 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 
 	//Delete old pic
 	bucket := config.ImageBucket()
-	image := oldPic[len("https://storage.cloud.google.com//"+bucket):]
-	webURL := os.Getenv("WEBURL")
-	client := &http.Client{}
-	req, err := http.NewRequest("DELETE", webURL+"/images/"+image, nil)
-	resp, err := client.Do(req)
+	image := oldPic[len("https://storage.cloud.google.com//image_"+bucket):]
+	err = DeleteImage(ctx, image, userID)
 
 	if err != nil {
 		log.Printf("Failure deleting image: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	defer resp.Body.Close()
 
 	//Return updated user
 	out, err := json.Marshal(user)
