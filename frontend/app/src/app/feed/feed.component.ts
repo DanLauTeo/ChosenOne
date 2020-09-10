@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Image } from '../_models/image';
 
 @Component({
   selector: 'app-feed',
@@ -7,9 +8,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FeedComponent implements OnInit {
 
+  images: Image[];
+
   constructor() { }
 
   ngOnInit(): void {
+    
   }
 
 }
