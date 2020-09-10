@@ -112,4 +112,10 @@ var apiRoutes = Routes{
 		"/messages/{chat_roomID}",
 		GetMessagesFromChatRoom,
 	},
+	Route{
+		"Get matcher for current user",
+		"GET",
+		"/matches/",
+		GetMatches,
+	},
 }
