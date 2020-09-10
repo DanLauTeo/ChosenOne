@@ -1,6 +1,8 @@
 import numpy as np
-import scipy.spatial.distance as distance
 import heapq
+
+import scann
+
 
 class ScannMatcher:
 
@@ -20,6 +22,8 @@ class ScannMatcher:
         matcher.users = users
         matcher.user_idx = user_idx
         matcher.interest_signatures = matcher.get_interest_signatures(images, user_idx, label_idx)
+
+        matcher.configure_scann()
 
         return matcher
 
@@ -56,6 +60,11 @@ class ScannMatcher:
 
         return interest_signatures
 
+    def configure_scann(self, num_neighbors=100):
+        self.scann = scann.ScannBuilder(self.interest_signatures, num_neighbors, "dot_product") \
+            .score_ah(2, anisotropic_quantization_threshold=0.2) \
+            .reorder(10 * num_neighbors) \
+            .create_pybind()
 
     def get_matches(self, user_id, max_results = 100):
         try:
@@ -64,22 +73,12 @@ class ScannMatcher:
         except KeyError:
             return []
 
-        # uses bruteforce implementation temporarily
+        num_neighbors = min(max_results, len(self.interest_signatures))
 
-        heap = []
+        # +1 because the matches will (most likely) include the current user
+        matches, _ = self.scann.search(user_signature, final_num_neighbors=num_neighbors+1)
 
-        for idx, signature in enumerate(self.interest_signatures):
-            if idx == user_index:
-                continue
-
-            item = distance.cosine(signature, user_signature), idx
-
-            if len(heap) < max_results:
-                heapq.heappush(heap, item)
-            else:
-                heapq.heappushpop(heap, item)
-
-        return list(map(lambda x: self.users[x[1]], heap))
+        return [self.users[idx] for idx in matches[:num_neighbors] if idx != user_index]
 
 
 def index_dict(lst):
