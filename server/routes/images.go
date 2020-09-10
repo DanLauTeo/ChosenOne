@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/gorilla/mux"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
@@ -106,4 +107,32 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, imageURL, http.StatusFound)
+}
+
+func HandleImageDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+
+	userService := services.Locator.UserService()
+
+	userID := userService.GetCurrentUserID(ctx)
+
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	bucket := config.ImageBucket()
+
+	vars := mux.Vars(r)
+	image := vars["imageID"]
+
+	storageClient := services.Locator.StorageClient()
+
+	err := storageClient.Delete(ctx, bucket, image)
+	if err != nil {
+		serveError(ctx, w, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Success"))
 }

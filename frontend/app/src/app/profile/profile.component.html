@@ -7,7 +7,7 @@
 <div class="aboutUser">
   <div>
     <h2 id="username">{{user.username}}</h2>
-    <button id="edit" (click)="edit()">
+    <button *ngIf="isCurrentUser"  id="edit" (click)="edit()">
       <img src="../assets/icons/create-24px.svg">
     </button>
   </div>
