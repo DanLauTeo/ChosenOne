@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Image } from '../../_models/image';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-feed-image',
@@ -10,13 +11,13 @@ export class FeedImageComponent implements OnInit {
 
   @Input() image: Image;
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
   }
 
   redirect(id) {
-    console.log("Click!")
+    this.router.navigate(['/profile/'+id]);
   }
 
 }
