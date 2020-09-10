@@ -23,8 +23,6 @@ import (
 	"localdev/main/services"
 	"log"
 	"net/http"
-	"net/http/httptest"
-	"os"
 
 	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
@@ -207,13 +205,26 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	//Get old profile pic
 	oldPic := user.ProfilePic
 
-	//Get new pic from request
-	rr := httptest.NewRecorder()
-	HandleImageUpload(rr, r)
-	user.ProfilePic = rr.HeaderMap.Get("Location")
+	//Get new pic
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		serveError(ctx, w, err)
+		return
+	}
+	defer file.Close()
+
+	//Save new pic
+	imageURL, err := UploadImage(ctx, userID, "user_profile_image", nil, file)
+	if err != nil {
+		log.Printf("Error saving image: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("error saving photo"))
+		return
+	}
 
 	//Update user
-	k, err := dsClient.Put(ctx, k, &user)
+	user.ProfilePic = imageURL
+	k, err = dsClient.Put(ctx, k, &user)
 	if err != nil {
 		log.Printf("Cannot save user to DataStore: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -222,12 +233,9 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 
 	//Delete old pic
 	bucket := config.ImageBucket()
-	image := oldPic[len("https://storage.cloud.google.com//"+bucket):]
-	webURL := os.Getenv("WEBURL")
-	client := &http.Client{}
-	req, err := http.NewRequest("DELETE", webURL+"/images/"+image, nil)
-	resp, err := client.Do(req)
-	defer resp.Body.Close()
+	image := oldPic[len("https://storage.cloud.google.com//image_"+bucket):]
+	err = DeleteImage(ctx, image, userID)
+
 	if err != nil {
 		log.Printf("Failure deleting image: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
