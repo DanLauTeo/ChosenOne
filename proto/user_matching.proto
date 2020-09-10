@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service Matcher {
     rpc GetMatches(GetMatchesRequest) returns (GetMatchesReply) {}
+    rpc RecalcScaNN(Empty) returns (Empty) {}
 }
 
 message GetMatchesRequest {
@@ -10,4 +11,8 @@ message GetMatchesRequest {
 
 message GetMatchesReply {
     repeated string user_ids = 1;
+}
+
+message Empty {
+
 }

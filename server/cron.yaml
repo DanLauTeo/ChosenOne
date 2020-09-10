@@ -1,0 +1,4 @@
+cron:
+- description: Recalculate user matches
+  url: /tasks/recalc-user-matches/
+  schedule: every 15 mins
