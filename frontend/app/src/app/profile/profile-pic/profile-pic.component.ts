@@ -14,6 +14,7 @@ export class ProfilePicComponent implements OnInit {
   isImageSaved: boolean;
   cardImageBase64: string;
   user : User;
+  selectedFile: any;
 
   constructor( private accountService : AccountService) {
     //this.accountService.user.subscribe(x => this.user = x);
@@ -24,53 +25,64 @@ export class ProfilePicComponent implements OnInit {
   }
 
   fileChangeEvent(fileInput: any) {
-      this.imageError = null;
-      if (fileInput.target.files && fileInput.target.files[0]) {
-          // Size Filter Bytes
-          const max_size = 20971520;
-          const allowed_types = ['image/png', 'image/jpeg'];
-          const max_height = 15200;
-          const max_width = 25600;
+    this.imageError = null;
+    if (fileInput.target.files && fileInput.target.files[0]) {
+        // Size Filter Bytes
+        const max_size = 20971520;
+        const allowed_types = ['image/png', 'image/jpeg'];
+        const max_height = 15200;
+        const max_width = 25600;
 
-          if (fileInput.target.files[0].size > max_size) {
-              this.imageError =
-                  'Maximum size allowed is ' + max_size / 1000 + 'Mb';
+        if (fileInput.target.files[0].size > max_size) {
+            this.imageError =
+                'Maximum size allowed is ' + max_size / 1000 + 'Mb';
 
-              return false;
-          }
+            return false;
+        }
 
-          if (!_.includes(allowed_types, fileInput.target.files[0].type)) {
-              this.imageError = 'Only Images are allowed ( JPG | PNG )';
-              return false;
-          }
+        if (!_.includes(allowed_types, fileInput.target.files[0].type)) {
+            this.imageError = 'Only Images are allowed ( JPG | PNG )';
+            return false;
+        }
 
-          const reader = new FileReader();
-          reader.onload = (e: any) => {
-              const image = new Image();
-              image.src = e.target.result;
-              image.onload = rs => {
-                  const img_height = rs.currentTarget['height'];
-                  const img_width = rs.currentTarget['width'];
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+            const image = new Image();
+            image.src = e.target.result;
+            image.onload = rs => {
+                const img_height = rs.currentTarget['height'];
+                const img_width = rs.currentTarget['width'];
 
-                  if (img_height > max_height || img_width > max_width) {
-                      this.imageError =
-                          'Maximum dimensions allowed ' +
-                          max_height +
-                          'x' +
-                          max_width +
-                          'px';
-                      return false;
-                  } else {
-                      const imgBase64Path = e.target.result;
-                      this.cardImageBase64 = imgBase64Path;
-                      this.isImageSaved = true;
-                      // this.previewImagePath = imgBase64Path;
-                  }
-              };
-          };
+                if (img_height > max_height || img_width > max_width) {
+                    this.imageError =
+                        'Maximum dimensions allowed ' +
+                        max_height +
+                        'x' +
+                        max_width +
+                        'px';
+                    return false;
+                } else {
+                    const imgBase64Path = e.target.result;
+                    this.cardImageBase64 = imgBase64Path;
+                    this.isImageSaved = true;
+                    // this.previewImagePath = imgBase64Path;
+                }
+            };
+        };
 
-          reader.readAsDataURL(fileInput.target.files[0]);
-      }
+        reader.readAsDataURL(fileInput.target.files[0]);
+    }
+  }
+
+  onFileChanged(event) {
+    const file = event.target.files[0]
+  }
+
+  onUpload() {
+    // this.http is the injected HttpClient
+    const uploadData = new FormData();
+    //uploadData.append('myFile', this.selectedFile, this.selectedFile.name);
+    
   }
 
   removeImage() {

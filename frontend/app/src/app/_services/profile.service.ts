@@ -10,11 +10,19 @@ export class ProfileService {
 
   constructor(private httpClient: HttpClient) { }
 
-  public upload(id, formData) {
-    this.routeURL = "http://localhost:8000/user/"+id+"/profile-image";
-    return this.httpClient.put<any>(this.routeURL, formData, {
-      reportProgress: true,  
-      observe: 'events'  
-    });
+  public getUser(id) {
+    this.routeURL = "user/"+id;
+    return this.httpClient.get<any>(this.routeURL);
+  }
+
+  public patchUser(id, patch) {
+    this.routeURL = "user/"+id;
+    return this.httpClient.patch<any>(this.routeURL, patch);
+  }
+  
+  public uploadProfilePic(id, formData) {
+    this.routeURL = "user/"+id+"/profile-image";
+    return this.httpClient.put<any>(this.routeURL, formData);
   }
 }
+

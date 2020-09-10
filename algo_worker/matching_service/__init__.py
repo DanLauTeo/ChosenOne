@@ -1,3 +1,4 @@
+from .image_loader import ImageLoader
 from .scann_matcher import ScannMatcher
 
 
@@ -14,6 +15,8 @@ class MatchingService:
 
     async def recalc_scann(self):
 
-        scann_matcher = await ScannMatcher.create()
+        image_loader = ImageLoader()
+
+        scann_matcher = await ScannMatcher.create(image_loader=image_loader)
 
         self.scann_matcher = scann_matcher
