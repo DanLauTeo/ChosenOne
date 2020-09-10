@@ -121,6 +121,11 @@ var apiRoutes = Routes{
 		"/images/{imageID}",
 		HandleImageDelete,
 	},
+  "Get matcher for current user",
+		"GET",
+		"/matches/",
+		GetMatches,
+	},
 }
 
 func (h ngHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -34,8 +34,9 @@ func init() {
 }
 
 var config = struct {
-	Project     string `json:"project"`
-	ImageBucket string `json:"image_bucket"`
+	Project        string `json:"project"`
+	ImageBucket    string `json:"image_bucket"`
+	MatcherAddress string `json:"matcher_address"`
 }{}
 
 func Project() string {
@@ -44,4 +45,8 @@ func Project() string {
 
 func ImageBucket() string {
 	return config.ImageBucket
+}
+
+func MatcherAddress() string {
+	return config.MatcherAddress
 }
