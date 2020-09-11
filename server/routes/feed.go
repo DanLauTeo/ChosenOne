@@ -18,6 +18,7 @@ func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
 	query := datastore.NewQuery("Image")
 	it := services.Locator.DsClient().Run(ctx, query)
 	for {
+		var feed models.Feed
 		var image models.Image
 		_, err := it.Next(&image)
 		if err == iterator.Done {
@@ -28,7 +29,9 @@ func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		response = append(([]string{image.GCSObjectID()}), response)
+		feed.OwnerID = image.OwnerID
+		feed.ImageURL = image.GCSObjectID()
+		response = append(([]models.Feed{}), response)
 	}
 	out, err := json.Marshal(response)
 	w.Write([]byte(out))
