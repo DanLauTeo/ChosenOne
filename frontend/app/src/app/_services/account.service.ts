@@ -20,6 +20,10 @@ export class AccountService {
     return this.user;
   }
 
+  getUserID(): string {
+    return this.user.id;
+  }
+
   setUser(){
     this.user = USER;
   }

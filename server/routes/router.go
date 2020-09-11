@@ -18,6 +18,8 @@ package routes
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gorilla/mux"
 )
@@ -27,6 +29,11 @@ type Route struct {
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
+}
+
+type ngHandler struct {
+	staticPath string
+	indexPath  string
 }
 
 type Routes []Route
@@ -41,6 +48,8 @@ func NewRouter() *mux.Router {
 			Name(route.Name).
 			Handler(route.HandlerFunc)
 	}
+	angular := ngHandler{staticPath: "../frontend/app/dist/app", indexPath: "index.html"}
+	router.PathPrefix("/").Handler(angular)
 
 	return router
 }
@@ -63,12 +72,6 @@ var apiRoutes = Routes{
 		"PUT",
 		"/user/{id}/profile-image",
 		ProfilePic,
-	},
-	Route{
-		"Test Profile",
-		"GET",
-		"/",
-		CheckDatastore,
 	},
 	Route{
 		"Get login URL",
@@ -119,6 +122,7 @@ var apiRoutes = Routes{
 		GetMessagesFromChatRoom,
 	},
 	Route{
+<<<<<<< HEAD
 		"Post message in chatroom",
 		"POST",
 		"/messages/{chatroomID}",
@@ -130,4 +134,41 @@ var apiRoutes = Routes{
 		"/messages/{chatroomID}",
 		GetMessagesFromChatRoom,
 	},
+=======
+		"Handle image delete",
+		"DELETE",
+		"/images/{imageID}",
+		HandleImageDelete,
+	},
+  "Get matcher for current user",
+		"GET",
+		"/matches/",
+		GetMatches,
+	},
+}
+
+func (h ngHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	//Get filepath
+	path, err := filepath.Abs(r.URL.Path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	path = filepath.Join(h.staticPath, path)
+
+	//Check whether file exists
+	_, err = os.Stat(path)
+	if os.IsNotExist(err) {
+		//File does not exist, serve Angular app
+		http.ServeFile(w, r, filepath.Join(h.staticPath, h.indexPath))
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//Otherwise, serve file
+	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
+>>>>>>> a47c6e03846dae90a818f9d4b26207fb96c49256
 }
