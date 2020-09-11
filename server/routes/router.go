@@ -118,4 +118,16 @@ var apiRoutes = Routes{
 		"/messages/{chatroomID}",
 		GetMessagesFromChatRoom,
 	},
+	Route{
+		"Post message in chatroom",
+		"POST",
+		"/messages/{chatroomID}",
+		GetMessagesFromChatRoom,
+	},
+	Route{
+		"Delete message in chatroom",
+		"DELETE",
+		"/messages/{chatroomID}",
+		GetMessagesFromChatRoom,
+	},
 }

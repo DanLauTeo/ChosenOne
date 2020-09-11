@@ -23,6 +23,7 @@ import (
 	"localdev/main/services"
 	"log"
 	"net/http"
+	//"reflect"
 
 	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
@@ -156,17 +157,27 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	requestedUserID := string(bodyBytes)
-	participants := []string{userID, requestedUserID}
 	
 	chatroomKey := datastore.IncompleteKey("ChatRoom", nil)
-	cr := models.ChatRoom{chatroomKey, participants, nil}
-	_, err = dsClient.Put(ctx, chatroomKey, &cr)
+	cr := new(models.ChatRoom)
+	cr.Participants = []string{userID, requestedUserID}
+	cr.Messages = nil
+	cr.ID, err = dsClient.Put(ctx, chatroomKey, cr)
 	if err != nil {
 		fmt.Println(err)
 		log.Printf("Cannot create new chat room: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	cr.Address = fmt.Sprint(cr.ID.ID)
+	_, err = dsClient.Put(ctx, cr.ID, cr)
+	if err != nil {
+		fmt.Println(err)
+		log.Printf("Cannot create new chat room: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	
 	//add chatroomKey to CurrentUser.ChatRooms
 	k1 := datastore.NameKey("User", userID, nil)
@@ -178,7 +189,7 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	currentUser.Chatrooms = append(currentUser.Chatrooms, chatroomKey)
+	currentUser.Chatrooms = append(currentUser.Chatrooms, cr.ID)
 	
 	k1, err = dsClient.Put(ctx, k1, &currentUser)
 	if err != nil {
@@ -197,7 +208,7 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	requestedUser.Chatrooms = append(requestedUser.Chatrooms, chatroomKey)
+	requestedUser.Chatrooms = append(requestedUser.Chatrooms, cr.ID)
 	
 	k2, err = dsClient.Put(ctx, k2, &currentUser)
 	if err != nil {
@@ -205,6 +216,15 @@ func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(cr)
+	if err != nil {
+		log.Printf("Cannot convert Message to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){  
@@ -213,6 +233,12 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 	vars := mux.Vars(r)
 	chatroomID := vars["chatroomID"]
 
+	var chatrooms []*models.ChatRoom
+	_, err := dsClient.GetAll(ctx, datastore.NewQuery("ChatRoom").Filter("Address=",chatroomID), &chatrooms)
+	if err != nil {
+		log.Printf("entity not found with query")
+	}
+	//chatroomID = fmt.Sprint(chatrooms[0].ID)
 	bodyBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Cannot read request body: %v", err)
@@ -234,11 +260,13 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 	if err != nil {
 		fmt.Println(err)
 	}
-	k := datastore.NameKey("ChatRoom", chatroomID, nil)
+	//k := datastore.NameKey("ChatRoom", chatroomID, nil)
 
 	var chatroom models.ChatRoom
 
-	if err := dsClient.Get(ctx, k, &chatroom); err != nil {
+	if err := dsClient.Get(ctx, chatrooms[0].ID, &chatroom); err != nil {
+		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
+		log.Printf("chatroom from DataStore: %v", chatrooms[0].ID)
 		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("entity not found"))
@@ -332,4 +360,3 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 		return
 	}
 }
-
