@@ -234,7 +234,7 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 	chatroomID := vars["chatroomID"]
 
 	var chatrooms []*models.ChatRoom
-	_, err := dsClient.GetAll(ctx, datastore.NewQuery("ChatRoom").Filter("Address=",chatroomID), &chatrooms)
+	keys, err := dsClient.GetAll(ctx, datastore.NewQuery("ChatRoom").Filter("Address=",chatroomID), &chatrooms)
 	if err != nil {
 		log.Printf("entity not found with query")
 	}
@@ -264,7 +264,7 @@ func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){
 
 	var chatroom models.ChatRoom
 
-	if err := dsClient.Get(ctx, chatrooms[0].ID, &chatroom); err != nil {
+	if err := dsClient.Get(ctx, keys[0], &chatroom); err != nil {
 		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
 		log.Printf("chatroom from DataStore: %v", chatrooms[0].ID)
 		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)

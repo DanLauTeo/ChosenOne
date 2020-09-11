@@ -122,7 +122,6 @@ var apiRoutes = Routes{
 		GetMessagesFromChatRoom,
 	},
 	Route{
-<<<<<<< HEAD
 		"Post message in chatroom",
 		"POST",
 		"/messages/{chatroomID}",
@@ -134,13 +133,14 @@ var apiRoutes = Routes{
 		"/messages/{chatroomID}",
 		GetMessagesFromChatRoom,
 	},
-=======
+	Route{
 		"Handle image delete",
 		"DELETE",
 		"/images/{imageID}",
 		HandleImageDelete,
 	},
-  "Get matcher for current user",
+	Route{
+  		"Get matcher for current user",
 		"GET",
 		"/matches/",
 		GetMatches,
@@ -170,5 +170,4 @@ func (h ngHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	//Otherwise, serve file
 	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
->>>>>>> a47c6e03846dae90a818f9d4b26207fb96c49256
 }
