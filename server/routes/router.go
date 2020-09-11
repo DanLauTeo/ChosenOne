@@ -104,46 +104,35 @@ var apiRoutes = Routes{
 		HandleImageUpload,
 	},
 	Route{
-		"Get chatrooms from user",
-		"GET",
-		"/messages",
-		GetChatRooms,
-	},
-	Route{
-		"Create chatroom",
-		"POST",
-		"/messages",
-		CreateChatRoom,
-	},
-	Route{
-		"Get messages from chatroom",
-		"GET",
-		"/messages/{chatroomID}",
-		GetMessagesFromChatRoom,
-	},
-	Route{
-		"Post message in chatroom",
-		"POST",
-		"/messages/{chatroomID}",
-		GetMessagesFromChatRoom,
-	},
-	Route{
-		"Delete message in chatroom",
-		"DELETE",
-		"/messages/{chatroomID}",
-		GetMessagesFromChatRoom,
-	},
-	Route{
 		"Handle image delete",
 		"DELETE",
 		"/images/{imageID}",
 		HandleImageDelete,
 	},
 	Route{
-  		"Get matcher for current user",
+		"Get matcher for current user",
 		"GET",
 		"/matches/",
 		GetMatches,
+	},
+	// ChatRooms
+	Route{
+		"Get chatroom by id",
+		"GET",
+		"/chatrooms/{id}/",
+		GetChatRoom,
+	},
+	Route{
+		"List user's chatrooms",
+		"GET",
+		"/chatrooms/",
+		ListChatRooms,
+	},
+	Route{
+		"Create a new chatroom",
+		"POST",
+		"/chatrooms/",
+		CreateChatRoom,
 	},
 }
 

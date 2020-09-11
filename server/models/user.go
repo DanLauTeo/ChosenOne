@@ -19,6 +19,7 @@ import "cloud.google.com/go/datastore"
 
 //All strings for now, type will be changed as project develops
 type User struct {
+	Key               *datastore.Key   `json:"-" datastore:"__key__"`
 	Name              string           `json:"username"`
 	ID                string           `json:"id"`
 	ProfilePic        string           `json:"profilePic"`
