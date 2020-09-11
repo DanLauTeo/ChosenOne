@@ -22,6 +22,7 @@ export class ProfileService {
   
   public uploadProfilePic(id, formData) {
     this.routeURL = "user/"+id+"/profile-image";
-    return this.httpClient.put<any>(this.routeURL, formData);
+    
+  return this.httpClient.put(this.routeURL, formData);
   }
 }

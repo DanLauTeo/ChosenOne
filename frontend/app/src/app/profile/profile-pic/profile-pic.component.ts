@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import * as _ from 'lodash';
 import { AccountService } from '../../_services/account.service';
 import { User  } from '../../_models/user';
+import { ProfileService } from '../../_services/profile.service'
 
 @Component({
   selector: 'app-profile-pic',
@@ -9,85 +10,63 @@ import { User  } from '../../_models/user';
   styleUrls: ['./profile-pic.component.css']
 })
 export class ProfilePicComponent implements OnInit {
-
-  imageError: string;
+  @Input() id: string;
+  @Input() picURL: any;
+  imageFile: File;
   isImageSaved: boolean;
-  cardImageBase64: string;
   user : User;
-  selectedFile: any;
+  @Output() userOut = new EventEmitter<User>(); 
 
-  constructor( private accountService : AccountService) {
+  constructor( private accountService : AccountService, private profileService : ProfileService) {
     //this.accountService.user.subscribe(x => this.user = x);
     this.user = accountService.getUser();
   }
 
   ngOnInit() {
+    this.imageFile = null;
+    this.isImageSaved = false;
+    console.log(this.picURL)
   }
 
-  fileChangeEvent(fileInput: any) {
-    this.imageError = null;
-    if (fileInput.target.files && fileInput.target.files[0]) {
-        // Size Filter Bytes
-        const max_size = 20971520;
-        const allowed_types = ['image/png', 'image/jpeg'];
-        const max_height = 15200;
-        const max_width = 25600;
+  onFileChange(event) {
+    console.log(event.target.files);
+    this.imageFile = event.target.files[0]
 
-        if (fileInput.target.files[0].size > max_size) {
-            this.imageError =
-                'Maximum size allowed is ' + max_size / 1000 + 'Mb';
+    this.isImageSaved = true;
 
-            return false;
-        }
-
-        if (!_.includes(allowed_types, fileInput.target.files[0].type)) {
-            this.imageError = 'Only Images are allowed ( JPG | PNG )';
-            return false;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-            const image = new Image();
-            image.src = e.target.result;
-            image.onload = rs => {
-                const img_height = rs.currentTarget['height'];
-                const img_width = rs.currentTarget['width'];
-
-                if (img_height > max_height || img_width > max_width) {
-                    this.imageError =
-                        'Maximum dimensions allowed ' +
-                        max_height +
-                        'x' +
-                        max_width +
-                        'px';
-                    return false;
-                } else {
-                    const imgBase64Path = e.target.result;
-                    this.cardImageBase64 = imgBase64Path;
-                    this.isImageSaved = true;
-                    // this.previewImagePath = imgBase64Path;
-                }
-            };
-        };
-
-        reader.readAsDataURL(fileInput.target.files[0]);
-    }
-  }
-
-  onFileChanged(event) {
-    const file = event.target.files[0]
+    var mimeType = event.target.files[0].type;
+		
+		if (mimeType.match(/image\/*/) == null) {
+			return;
+		}
+		
+		var reader = new FileReader();
+		reader.readAsDataURL(event.target.files[0]);
+		
+		reader.onload = (_event) => {
+			this.picURL = reader.result; 
+		}
   }
 
   onUpload() {
     // this.http is the injected HttpClient
-    const uploadData = new FormData();
-    //uploadData.append('myFile', this.selectedFile, this.selectedFile.name);
+    if (this.imageFile == null){
+      return;
+    }
+    else{
+      const uploadData = new FormData();
+      uploadData.append('file', this.imageFile);
+      this.profileService.uploadProfilePic(this.id, uploadData).subscribe((user:User) => {
+        this.userOut.emit(user);
+      });
+    }
     
   }
 
   removeImage() {
-      this.cardImageBase64 = null;
-      this.isImageSaved = false;
+    this.imageFile = null;
+    this.isImageSaved = false;
+    this.picURL = this.user.profilePic;
   }
 
 }
