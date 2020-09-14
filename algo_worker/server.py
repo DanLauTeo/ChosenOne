@@ -15,11 +15,16 @@ class MatcherServicer(user_matching_pb2_grpc.MatcherServicer):
 
     def __init__(self, matching_service):
         self.matching_service = matching_service
+        self.recalc_loop = asyncio.new_event_loop()
 
     def GetMatches(self, request, context):
         return user_matching_pb2.GetMatchesReply(
             user_ids=self.matching_service.get_matches(request.user_id)
         )
+
+    def RecalcScaNN(self, request, context):
+        self.recalc_loop.create_task(self.matching_service.recalc_scann())
+        return user_matching_pb2.Empty()
 
 
 async def serve(port):
