@@ -18,6 +18,7 @@ package models
 
 //All strings for now, type will be changed as project develops
 type Feed struct {
-	OwnerID  string
-	ImageURL []string
+	ProfilePic string
+	OwnerID    string
+	ImageURL   string
 }
