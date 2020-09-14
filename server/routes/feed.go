@@ -3,6 +3,7 @@ package routes
 import (
 	"localdev/main/models"
 	"localdev/main/services"
+	"localdev/main/config"
 	"net/http"
 	"encoding/json"
 	"log"
@@ -14,9 +15,10 @@ import (
 
 
 func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
-	var response []string
+	var response []models.Feed
 	ctx := appengine.NewContext(r)
 	query := datastore.NewQuery("Image").Order("-created").Limit(100) //sorts Images entities by creation time in descending order
+	dsClient := services.Locator.DsClient()
 	it := services.Locator.DsClient().Run(ctx, query)
 	for {
 		var feed models.Feed
@@ -31,11 +33,10 @@ func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		feed.OwnerID = image.OwnerID
-		feed.ImageURL = image.GCSObjectID()
+		feed.ImageURL = "https://storage.cloud.google.com/" + config.ImageBucket() + "/" + image.GCSObjectID()
 		k := datastore.NameKey("User", feed.OwnerID, nil)
 
 		var user models.User
-		dsClient := services.Locator.DsClient()
 		if err = dsClient.Get(ctx, k, &user); err != nil {
 			log.Printf("Cannot retrieve user from DataStore: %v", err)
 			w.WriteHeader(http.StatusNotFound)
@@ -52,6 +53,8 @@ func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
 	out, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("Error cannot convert feed to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Cannot convert feed to JSON"))
 	}
 	w.Write([]byte(out))
 }
