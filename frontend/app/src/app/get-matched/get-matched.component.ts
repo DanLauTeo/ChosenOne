@@ -1,6 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import * as Rx from 'rxjs';
 import { MatchesService } from '../_services/matches.service';
+import {USERS} from '../_mock_models/mock_users'
+import {User} from '../_models/user'
 
 @Component({
   selector: 'app-get-matched',
@@ -11,17 +13,19 @@ export class GetMatchedComponent implements OnInit {
 
   private matchesService: MatchesService;
 
-  matches: string[];
+  //matches: string[];
+  matches: User[];
 
   constructor(
-    matchesService: MatchesService
+    //matchesService: MatchesService
   ) {
-    this.matchesService = matchesService;
+    //this.matchesService = matchesService;
   }
 
   ngOnInit(): void {
-    this.matchesService.getMatches()
-      .subscribe(next => this.matches = next)
+    //this.matchesService.getMatches()
+    //  .subscribe(next => this.matches = next)
+    this.matches =  USERS
   }
 
 }

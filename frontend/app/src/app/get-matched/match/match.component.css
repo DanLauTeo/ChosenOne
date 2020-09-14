@@ -1,9 +1,50 @@
-.match {
-    background-color: lightgreen;
-    border: 2px solid black;
+.match .profile-pic {
+    object-fit: cover;
+    width: 50%;
+    height: 50%;
+    clip-path: circle();
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.match .profile-pic {
-    width: 50px;
-    clip-path: circle();
+button{
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 15px;
+    background-color: white;
+    margin-top: 15px;
+    color: #31e98c;
+    transition: all 0.2s ease-in-out;
+    border: 2px solid #31e98c; /* Green */
+    border-radius: 8px;
+    margin-bottom: 10%;
+}
+
+button:hover{
+    color: #43fbff;
+    box-shadow: 0 5px 15px #43fbff;
+    border: 2px solid #43fbff;
+}
+
+a {
+    text-decoration: none;
+    text-align: center;
+    color: black;
+    display: flex;
+    justify-content: center;
+}
+
+.match {
+    height: 100%;
+    margin-left: 5%;
+    margin-right: 5%;
+    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.09), 0 4px 2px rgba(0, 0, 0, 0.09),
+    0 8px 4px rgba(0, 0, 0, 0.09), 0 16px 8px rgba(0, 0, 0, 0.09),
+    0 32px 16px rgba(0, 0, 0, 0.09);
+}
+
+div {
+    height: 70%;
 }

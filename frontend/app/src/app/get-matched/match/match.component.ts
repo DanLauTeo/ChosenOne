@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core"
-import { ProfileService } from "src/app/_services/profile.service";
-import { User } from "src/app/_models/user";
+import { ProfileService } from "../../_services/profile.service";
+import { User } from "../../_models/user";
 
 @Component({
   selector: "app-match",
@@ -11,22 +11,23 @@ export class MatchComponent implements OnInit {
 
   private profileService: ProfileService;
 
-  @Input() user_id: string;
+  //@Input() user_id: string;
 
-  user: User;
+  @Input() user: User;
 
   constructor(
-    profileService: ProfileService
+ //   profileService: ProfileService
   ) {
-    this.profileService = profileService;
+//   this.profileService = profileService;
   }
 
   ngOnInit(): void {
-    this.profileService.getUser(this.user_id)
-      .subscribe(user => this.user = user)
+    //this.profileService.getUser(this.user_id)
+    //  .subscribe(user => this.user = user)
   }
 
   startChat(): void {
-    console.log(`Start chat with user ${this.user_id}`)
+    //console.log(`Start chat with user ${this.user_id}`)
+    console.log('Start chat with user $(this.user.id)')
   }
 }

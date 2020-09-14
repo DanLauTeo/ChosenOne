@@ -2,7 +2,8 @@
 
 <div class="content">
     <div *ngFor="let user of matches">
-        <app-match [user_id]="user"></app-match>
+        <!--<app-match [user_id]="user"></app-match>-->
+        <app-match [user]="user"></app-match>
     </div>
 
     <div *ngIf="matches.length == 0">
