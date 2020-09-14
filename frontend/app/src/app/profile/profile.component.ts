@@ -15,10 +15,10 @@ import { ActivatedRoute } from '@angular/router';
 export class ProfileComponent implements OnInit {
   user : User;
   isCurrentUser: boolean;
+  id: string;
 
   constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute) {
-    //this.accountService.user.subscribe(x => this.user = x);
-    this.user = accountService.getUser();
+
   }
 
   ngOnInit(): void {
@@ -28,23 +28,24 @@ export class ProfileComponent implements OnInit {
 
   getProfile(): void {
     //Get ID from route
-    let id = this.route.snapshot.paramMap.get('id');
+    this.id = this.route.snapshot.paramMap.get('id');
 
     //Get ID of logged in user
     let currentId = this.accountService.getUserID();
 
     //If no ID in route, assume user is going to own profile
-    if (id == null) {
-      id = currentId;
+    if (this.id == null) {
+      this.id = currentId;
     } 
 
     //If user on own profile, set isCurrentUser to true
-    if (currentId == id) {
+    if (currentId == this.id) {
       this.isCurrentUser = true;
     }
 
-    this.profileService.getUser(id).subscribe((user) => {
+    this.profileService.getUser(this.id).subscribe((user) => {
       this.user = user;
+      console.log(user);
     });
   }
 
@@ -92,6 +93,11 @@ export class ProfileComponent implements OnInit {
         document.getElementById("bio").contentEditable = "true";
       }
     }
+  }
+
+  onPicChange(event) {
+    console.log(event);
+    this.user = event;
   }
 
   logout() {
