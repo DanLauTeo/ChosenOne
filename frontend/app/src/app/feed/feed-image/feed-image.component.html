@@ -1,0 +1,7 @@
+<mat-card (click)="redirect(image.ownerID)" class="card">
+    <mat-card-header>
+      <div mat-card-avatar class="profile-pic" style="background-image: url('{{image.ownerProfile}}');"></div>
+      <mat-card-title>{{image.ownerName}}</mat-card-title>
+    </mat-card-header>
+    <img mat-card-image src="{{image.imgURL}}" alt="Photo">
+</mat-card>

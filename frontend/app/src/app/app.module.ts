@@ -14,6 +14,11 @@ import { GetMatchedComponent } from './get-matched/get-matched.component';
 import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component';
 
 import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { FeedImageComponent } from './feed/feed-image/feed-image.component';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatListModule } from '@angular/material/list';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -27,12 +32,17 @@ import { MatIconModule } from '@angular/material/icon';
     ChatsComponent,
     GetMatchedComponent,
     ProfilePicComponent,
+    FeedImageComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     MatIconModule,
+    MatCardModule,
+    MatGridListModule,
+    MatListModule,
+    NoopAnimationsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

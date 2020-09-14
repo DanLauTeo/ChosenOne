@@ -1,2 +1,6 @@
 <app-top-bar></app-top-bar>
-<p>feed works!</p>
+<mat-card>
+    <mat-card-content>
+        <app-feed-image *ngFor="let image of images; last as last" [image]=image></app-feed-image>  
+    </mat-card-content>
+</mat-card>

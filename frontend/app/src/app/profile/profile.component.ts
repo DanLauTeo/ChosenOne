@@ -16,7 +16,6 @@ export class ProfileComponent implements OnInit {
   user : User;
   isCurrentUser: boolean;
 
-
   constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute) {
     //this.accountService.user.subscribe(x => this.user = x);
     this.user = accountService.getUser();
@@ -99,8 +98,3 @@ export class ProfileComponent implements OnInit {
     this.accountService.logout();
   }
 }
-
-
-//i want you to send an message object
-//at message/chatroomID
-//with(senderID, body, timestamp)
