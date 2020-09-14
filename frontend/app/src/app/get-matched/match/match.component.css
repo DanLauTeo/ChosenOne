@@ -1,0 +1,9 @@
+.match {
+    background-color: lightgreen;
+    border: 2px solid black;
+}
+
+.match .profile-pic {
+    width: 50px;
+    clip-path: circle();
+}

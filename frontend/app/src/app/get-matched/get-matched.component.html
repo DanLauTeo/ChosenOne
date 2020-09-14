@@ -1,2 +1,14 @@
 <app-top-bar></app-top-bar>
-<p>get-matched works!</p>
+
+<div class="content">
+    <div *ngFor="let user of matches">
+        <app-match [user_id]="user"></app-match>
+    </div>
+
+    <div *ngIf="matches.length == 0">
+        <p>
+            Looks like you don't have any matches yet.
+            Don't worry, they'll begin appearing here shortly after you add some photos.
+        </p>
+    </div>
+</div>

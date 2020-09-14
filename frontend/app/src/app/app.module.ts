@@ -11,6 +11,7 @@ import { GalleryComponent } from './gallery/gallery.component';
 import { FeedComponent } from './feed/feed.component';
 import { ChatsComponent } from './chats/chats.component';
 import { GetMatchedComponent } from './get-matched/get-matched.component';
+import { MatchComponent } from './get-matched/match/match.component';
 import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -31,6 +32,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
     FeedComponent,
     ChatsComponent,
     GetMatchedComponent,
+    MatchComponent,
     ProfilePicComponent,
     FeedImageComponent,
   ],

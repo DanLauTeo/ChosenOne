@@ -58,19 +58,19 @@ var apiRoutes = Routes{
 	Route{
 		"Profile",
 		"GET",
-		"/user/{id}",
+		"/user/{id}/",
 		GetProfile,
 	},
 	Route{
 		"Customise Profile",
 		"PATCH",
-		"/user/{id}",
+		"/user/{id}/",
 		EditProfile,
 	},
 	Route{
 		"Update Profile Pic",
 		"PUT",
-		"/user/{id}/profile-image",
+		"/user/{id}/profile-image/",
 		ProfilePic,
 	},
 	Route{
