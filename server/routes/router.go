@@ -121,10 +121,17 @@ var apiRoutes = Routes{
 		"/images/{imageID}",
 		HandleImageDelete,
 	},
-  "Get matcher for current user",
+	Route{
+		"Get matcher for current user",
 		"GET",
 		"/matches/",
 		GetMatches,
+	},
+	Route{
+		"Recalculate user matches",
+		"GET",
+		"/tasks/recalc-user-matches/",
+		HandleRecalcUserMatches,
 	},
 }
 

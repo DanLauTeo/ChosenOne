@@ -1,0 +1,19 @@
+.profile-pic {
+    background-size: cover;
+}
+
+.mat-card {
+    width: 60%;
+    margin: auto;
+    margin-bottom: 5px;
+    background-color: #eeeeee;
+}
+
+.mat-card-header .mat-card-title {
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.mat-card-image {
+    margin: 15px -15px -15px;
+}

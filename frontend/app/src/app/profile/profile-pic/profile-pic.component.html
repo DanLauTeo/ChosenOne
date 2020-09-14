@@ -1,23 +1,16 @@
 <form>
   <div class="form-group">
     <fieldset class="form-group">
-      {{imageError}}
       <div class="custom-file fileInputProfileWrap">
-        <input type="file" (change)="fileChangeEvent($event)" class="fileInputProfile">
         <div class="img-space">
-
-          <ng-container *ngIf="isImageSaved; else elseTemplate">
-            <img [src]="cardImageBase64" />
-          </ng-container>
-
-          <ng-template #elseTemplate>
-            <img src="./../../assets/icon2.png" class="img-responsive">
-          </ng-template>
-
+          <input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
+            <img #profileImg src="{{picURL}}" (click)="fileInput.click()">
         </div>
-
       </div>
     </fieldset>
   </div>
-  <a class="btn btn-danger" (click)="removeImage()" *ngIf="isImageSaved">Remove</a>
+  <button (click)="removeImage()" *ngIf="isImageSaved">Remove</button>
+  <button (click)="onUpload()" *ngIf="isImageSaved">Upload</button>
 </form>
+
+

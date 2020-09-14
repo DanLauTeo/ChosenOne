@@ -1,5 +1,4 @@
-import { HttpClient, HttpEvent, HttpErrorResponse, HttpEventType, HttpParams } from  '@angular/common/http';  
-import { map } from  'rxjs/operators';
+import { HttpClient } from  '@angular/common/http';  
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -22,6 +21,7 @@ export class ProfileService {
   
   public uploadProfilePic(id, formData) {
     this.routeURL = "user/"+id+"/profile-image";
-    return this.httpClient.put<any>(this.routeURL, formData);
+    
+  return this.httpClient.put(this.routeURL, formData);
   }
 }

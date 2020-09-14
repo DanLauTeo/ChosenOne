@@ -18,6 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MatcherClient interface {
 	GetMatches(ctx context.Context, in *GetMatchesRequest, opts ...grpc.CallOption) (*GetMatchesReply, error)
+	RecalcScaNN(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type matcherClient struct {
@@ -41,12 +42,26 @@ func (c *matcherClient) GetMatches(ctx context.Context, in *GetMatchesRequest, o
 	return out, nil
 }
 
+var matcherRecalcScaNNStreamDesc = &grpc.StreamDesc{
+	StreamName: "RecalcScaNN",
+}
+
+func (c *matcherClient) RecalcScaNN(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/Matcher/RecalcScaNN", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MatcherService is the service API for Matcher service.
 // Fields should be assigned to their respective handler implementations only before
 // RegisterMatcherService is called.  Any unassigned fields will result in the
 // handler for that method returning an Unimplemented error.
 type MatcherService struct {
-	GetMatches func(context.Context, *GetMatchesRequest) (*GetMatchesReply, error)
+	GetMatches  func(context.Context, *GetMatchesRequest) (*GetMatchesReply, error)
+	RecalcScaNN func(context.Context, *Empty) (*Empty, error)
 }
 
 func (s *MatcherService) getMatches(_ interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -66,6 +81,23 @@ func (s *MatcherService) getMatches(_ interface{}, ctx context.Context, dec func
 	}
 	return interceptor(ctx, in, info, handler)
 }
+func (s *MatcherService) recalcScaNN(_ interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return s.RecalcScaNN(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     s,
+		FullMethod: "/Matcher/RecalcScaNN",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return s.RecalcScaNN(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
 
 // RegisterMatcherService registers a service implementation with a gRPC server.
 func RegisterMatcherService(s grpc.ServiceRegistrar, srv *MatcherService) {
@@ -75,12 +107,21 @@ func RegisterMatcherService(s grpc.ServiceRegistrar, srv *MatcherService) {
 			return nil, status.Errorf(codes.Unimplemented, "method GetMatches not implemented")
 		}
 	}
+	if srvCopy.RecalcScaNN == nil {
+		srvCopy.RecalcScaNN = func(context.Context, *Empty) (*Empty, error) {
+			return nil, status.Errorf(codes.Unimplemented, "method RecalcScaNN not implemented")
+		}
+	}
 	sd := grpc.ServiceDesc{
 		ServiceName: "Matcher",
 		Methods: []grpc.MethodDesc{
 			{
 				MethodName: "GetMatches",
 				Handler:    srvCopy.getMatches,
+			},
+			{
+				MethodName: "RecalcScaNN",
+				Handler:    srvCopy.recalcScaNN,
 			},
 		},
 		Streams:  []grpc.StreamDesc{},
@@ -103,6 +144,11 @@ func NewMatcherService(s interface{}) *MatcherService {
 	}); ok {
 		ns.GetMatches = h.GetMatches
 	}
+	if h, ok := s.(interface {
+		RecalcScaNN(context.Context, *Empty) (*Empty, error)
+	}); ok {
+		ns.RecalcScaNN = h.RecalcScaNN
+	}
 	return ns
 }
 
@@ -112,4 +158,5 @@ func NewMatcherService(s interface{}) *MatcherService {
 // use of this type is not recommended.
 type UnstableMatcherService interface {
 	GetMatches(context.Context, *GetMatchesRequest) (*GetMatchesReply, error)
+	RecalcScaNN(context.Context, *Empty) (*Empty, error)
 }
