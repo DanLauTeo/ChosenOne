@@ -2,4 +2,11 @@
     margin-top: 50px;
     margin-left: 15%;
     margin-right: 15%;
+    display:grid;
+    grid-template-columns: auto auto auto;
+}
+
+
+.content div{
+    height: 110%;
 }
