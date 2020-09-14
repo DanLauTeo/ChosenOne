@@ -15,16 +15,15 @@
 package models
 
 import (
-	"time"
-
 	"cloud.google.com/go/datastore"
 )
 
 type Message struct {
-	ID        int64     `json:"id" datastore:"-"`
-	SenderID  string    `json:"sender_id"`
-	Timestamp time.Time `json:"timestamp"`
-	Body      string    `json:"body"`
+	ID         int64  `json:"id" datastore:"-"`
+	ChatRoomID int64  `json:"chatroom_id"`
+	SenderID   string `json:"sender_id"`
+	Timestamp  int64  `json:"timestamp"`
+	Body       string `json:"body"`
 }
 
 func (x *Message) LoadKey(k *datastore.Key) error {

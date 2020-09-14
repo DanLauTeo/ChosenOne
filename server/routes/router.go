@@ -134,6 +134,25 @@ var apiRoutes = Routes{
 		"/chatrooms/",
 		CreateChatRoom,
 	},
+	// Messages
+	Route{
+		"Get messages from a chatroom",
+		"GET",
+		"/chatrooms/{id}/messages/",
+		GetChatRoomMessages,
+	},
+	Route{
+		"Post a message to a chatroom",
+		"POST",
+		"/chatrooms/{id}/messages/",
+		PostMessageInChatRoom,
+	},
+	Route{
+		"Delete a message",
+		"DELETE",
+		"/messages/{id}/",
+		DeleteMessage,
+	},
 }
 
 func (h ngHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
