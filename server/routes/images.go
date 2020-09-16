@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"localdev/main/config"
@@ -11,8 +12,10 @@ import (
 	"net/http"
 	"strconv"
 	"text/template"
+	"time"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/api/iterator"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 
@@ -55,6 +58,7 @@ func ImageUploadPage(w http.ResponseWriter, r *http.Request) {
 
 func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
+	fmt.Printf("Called")
 
 	userService := services.Locator.UserService()
 
@@ -89,7 +93,16 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, imageURL, http.StatusFound)
+	//http.Redirect(w, r, imageURL, http.StatusFound)
+
+	out, err := json.Marshal(imageURL)
+	if err != nil {
+		log.Errorf(ctx, "Cannot convert url to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
 }
 
 func HandleImageDelete(w http.ResponseWriter, r *http.Request) {
@@ -161,6 +174,7 @@ func UploadImage(ctx context.Context, user_id, image_type string, labels []model
 	entity.Type = image_type
 	entity.OwnerID = user_id
 	entity.Labels = labels
+	entity.Created = time.Now()
 
 	var err error
 
@@ -181,4 +195,45 @@ func UploadImage(ctx context.Context, user_id, image_type string, labels []model
 	}
 
 	return imageURL, nil
+}
+
+func GetUserImages(w http.ResponseWriter, r *http.Request) {
+	ctx := appengine.NewContext(r)
+	dsClient := services.Locator.DsClient()
+	vars := mux.Vars(r)
+	userID := vars["id"]
+
+	var imageURLs []string
+
+	if len(userID) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("no ID provided"))
+		return
+	}
+
+	query := datastore.NewQuery("Image").Order("-created").Filter("owner_id =", userID).Limit(100)
+	it := dsClient.Run(ctx, query)
+
+	for {
+		var image models.Image
+		_, err := it.Next(&image)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Errorf(ctx, "Error fetching next image: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		imageURLs = append(imageURLs, "https://storage.cloud.google.com/"+config.ImageBucket()+"/"+image.GCSObjectID())
+	}
+
+	out, err := json.Marshal(imageURLs)
+	if err != nil {
+		log.Errorf(ctx, "Cannot convert Images to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
 }

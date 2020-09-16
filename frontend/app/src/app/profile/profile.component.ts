@@ -3,7 +3,6 @@ import { User } from '../_models/user';
 import { Patch } from '../_models/patch';
 import { AccountService } from '../_services/account.service'
 import { Observable } from 'rxjs';
-import { USER } from '../_mock_models/mock_user'
 import { ProfileService } from '../_services/profile.service'
 import { ActivatedRoute } from '@angular/router';
 

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/datastore"
 )
@@ -11,6 +12,7 @@ type Image struct {
 	Type    string           `datastore:"type"`
 	OwnerID string           `datastore:"owner_id"`
 	Labels  []LabelWithScore `datastore:"labels"`
+	Created time.Time        `datastore:"created"`
 }
 
 type LabelWithScore struct {
