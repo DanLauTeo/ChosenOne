@@ -49,7 +49,6 @@ export class ProfilePicComponent implements OnInit {
   }
 
   onUpload() {
-    // this.http is the injected HttpClient
     if (this.imageFile == null){
       return;
     }
