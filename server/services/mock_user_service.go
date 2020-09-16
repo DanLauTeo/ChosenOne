@@ -5,7 +5,7 @@ import "context"
 type MockUserService struct{}
 
 func (_ *MockUserService) GetCurrentUserID(c context.Context) string {
-	return "2"
+	return "mock_user_id"
 }
 
 func (_ *MockUserService) IsCurrentUserAdmin(c context.Context) bool {

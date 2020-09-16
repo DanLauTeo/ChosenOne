@@ -16,347 +16,431 @@ package routes
 
 import (
 	"encoding/json"
-	"fmt"
+	"sort"
+	"strconv"
+	"time"
+
 	//"context"
 	"io/ioutil"
 	"localdev/main/models"
 	"localdev/main/services"
 	"log"
 	"net/http"
+
 	//"reflect"
 
 	"cloud.google.com/go/datastore"
 	"github.com/gorilla/mux"
-	"google.golang.org/api/iterator"
 	"google.golang.org/appengine"
 )
 
-func CheckChatDatastore(w http.ResponseWriter, r *http.Request) {
+var ListChatRooms = UserDecorate(listChatRooms)
+
+func listChatRooms(w http.ResponseWriter, r *http.Request, user *models.User) {
 	ctx := appengine.NewContext(r)
-	query := datastore.NewQuery("ChatRoom")
-	it := services.Locator.DsClient().Run(ctx, query)
-	for {
-		var chatroom models.ChatRoom
-		_, err := it.Next(&chatroom)
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Printf("Error fetching next chatroom: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprintf(w, "ChatRoom %q, Messages %q\n", chatroom.ID, chatroom.Messages)
-	}
-	w.Write([]byte("done"))
-}
 
-func GetMessagesFromChatRoom(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-	dsClient := services.Locator.DsClient()
-	vars := mux.Vars(r)
-	chatroomID := vars["chatroomID"]
-
-	userService := services.Locator.UserService()
-	userID := userService.GetCurrentUserID(ctx)
-
-	k := datastore.NameKey("ChatRoom", chatroomID, nil)
-
-	var chatroom models.ChatRoom
-
-	if err := dsClient.Get(ctx, k, &chatroom); err != nil {
-		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("entity not found"))
-		return
-	}
-
-	if userInList(userID, chatroom.Participants) {
-		log.Printf("User not participant of chatroom")
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("User not participant of chatroom"))
-		return
-	}
-
-	messages := make([]models.Message, len(chatroom.Messages)) //Will be max 100 messages
-	err := dsClient.GetMulti(ctx, chatroom.Messages, messages)
-	if err != nil {
-		log.Printf("Cannot get messages: %v", err)
-	}
-
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(messages)
-	if err != nil {
-		log.Printf("Cannot convert Message to JSON: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func GetChatRooms(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
 
-	userService := services.Locator.UserService()
-
-	userID := userService.GetCurrentUserID(ctx)
-
-	if userID == "" {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	k := datastore.NameKey("User", userID, nil)
-
-	var user models.User
-	if err := dsClient.Get(ctx, k, &user); err != nil {
-		log.Printf("Cannot retrieve user from DataStore: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("entity not found"))
-		return
-	}
-
-	chatrooms := make([]models.ChatRoom, len(user.Chatrooms))
+	var chatrooms = make([]models.ChatRoom, len(user.Chatrooms))
 
 	if err := dsClient.GetMulti(ctx, user.Chatrooms, chatrooms); err != nil {
-		log.Printf("Cannot retrieve chatrooms from DataStore: %v", err)
+		log.Printf("Failed to retrieve chatrooms from DataStore: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("entity not found"))
 		return
 	}
 
 	out, err := json.Marshal(chatrooms)
 	if err != nil {
-		log.Printf("Cannot convert Chatrooms to JSON: %v", err)
+		log.Printf("Failed to convert Chatrooms to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(out))
 }
 
-func userInList(a string, list []string) bool {
-    for _, b := range list {
-        if b == a {
-            return true
-        }
-    }
-    return false
-}
+var GetChatRoom = UserDecorate(getChatRoom)
 
-func CreateChatRoom(w http.ResponseWriter, r *http.Request) {
+func getChatRoom(w http.ResponseWriter, r *http.Request, user *models.User) {
 	ctx := appengine.NewContext(r)
+
 	dsClient := services.Locator.DsClient()
-	userService := services.Locator.UserService()
-	userID := userService.GetCurrentUserID(ctx)
 
-	bodyBytes, err := ioutil.ReadAll(r.Body)
+	paramID := mux.Vars(r)["id"]
+
+	id, err := strconv.ParseInt(paramID, 10, 64)
 	if err != nil {
-		log.Printf("Cannot read request body: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	requestedUserID := string(bodyBytes)
-	
-	chatroomKey := datastore.IncompleteKey("ChatRoom", nil)
-	cr := new(models.ChatRoom)
-	cr.Participants = []string{userID, requestedUserID}
-	cr.Messages = nil
-	cr.ID, err = dsClient.Put(ctx, chatroomKey, cr)
-	if err != nil {
-		fmt.Println(err)
-		log.Printf("Cannot create new chat room: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	cr.Address = fmt.Sprint(cr.ID.ID)
-	_, err = dsClient.Put(ctx, cr.ID, cr)
-	if err != nil {
-		fmt.Println(err)
-		log.Printf("Cannot create new chat room: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Couldn't parse id from request: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	
-	//add chatroomKey to CurrentUser.ChatRooms
-	k1 := datastore.NameKey("User", userID, nil)
-	
-	var currentUser models.User
-	if err := dsClient.Get(ctx, k1, &currentUser); err != nil {
-		log.Printf("Cannot update user: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	
-	currentUser.Chatrooms = append(currentUser.Chatrooms, cr.ID)
-	
-	k1, err = dsClient.Put(ctx, k1, &currentUser)
-	if err != nil {
-		log.Printf("Cannot update user: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	// add chatroomid to RequestedUser.ChatRooms
-	k2 := datastore.NameKey("User", requestedUserID, nil)
-	
-	var requestedUser models.User
-	if err := dsClient.Get(ctx, k2, &requestedUser); err != nil {
-		log.Printf("Cannot retrive user from datastore: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Printf("Cannot retrieve user from DataStore: %v", err)
-		return
-	}
-	
-	requestedUser.Chatrooms = append(requestedUser.Chatrooms, cr.ID)
-	
-	k2, err = dsClient.Put(ctx, k2, &currentUser)
-	if err != nil {
-		log.Printf("Cannot update user: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(cr)
-	if err != nil {
-		log.Printf("Cannot convert Message to JSON: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func PostMessageChatRoom(w http.ResponseWriter, r *http.Request){  
-	ctx := appengine.NewContext(r)
-	dsClient := services.Locator.DsClient()
-	vars := mux.Vars(r)
-	chatroomID := vars["chatroomID"]
-
-	var chatrooms []*models.ChatRoom
-	keys, err := dsClient.GetAll(ctx, datastore.NewQuery("ChatRoom").Filter("Address=",chatroomID), &chatrooms)
-	if err != nil {
-		log.Printf("entity not found with query")
-	}
-	//chatroomID = fmt.Sprint(chatrooms[0].ID)
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("Cannot read request body: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	
-	var message models.Message
-	err = json.Unmarshal(bodyBytes, &message)
-	if err != nil {
-		log.Printf("Cannot parse message to json body: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	//Setting the key name to be "<time><userID>"
-	keyname := message.Posted.String() + message.SenderID
-	newKey := datastore.NameKey("Message", keyname, nil)
-	newKey, err = dsClient.Put(ctx, newKey, &message)
-	if err != nil {
-		fmt.Println(err)
-	}
-	//k := datastore.NameKey("ChatRoom", chatroomID, nil)
-
-	var chatroom models.ChatRoom
-
-	if err := dsClient.Get(ctx, keys[0], &chatroom); err != nil {
-		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
-		log.Printf("chatroom from DataStore: %v", chatrooms[0].ID)
-		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("entity not found"))
-		return
-	}
-
-	userService := services.Locator.UserService()
-	userID := userService.GetCurrentUserID(ctx)
-
-	if userInList(userID, chatroom.Participants) {
-		log.Printf("User not participant of chatroom")
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("User not participant of chatroom"))
-		return
-	}
-	
-	if len(chatroom.Messages) > 100 {
-		//Delete first message in  list
-		keyOfFirstMessage := chatroom.Messages[0]
-		if err := dsClient.Delete(ctx, keyOfFirstMessage); err != nil {
-			log.Printf("Cannot delete first message: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	}
-
- }
- 
- func DeleteMessageChatRoom(w http.ResponseWriter, r *http.Request){
-	ctx := appengine.NewContext(r)
-	dsClient := services.Locator.DsClient()
-	vars := mux.Vars(r)
-	chatroomID := vars["chatroomID"]
-
-	bodyBytes, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("Cannot read request body: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	var message models.Message
-	err = json.Unmarshal(bodyBytes, &message)
-	if err != nil {
-		log.Printf("Cannot parse message to json body: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	//Get messages search for the one that is meant to be deleted, and delete it
-	k := message.Posted.String() + message.SenderID
-	keyOfUnwantedMessage := datastore.NameKey("Message", k, nil)
-	if err := dsClient.Delete(ctx, keyOfUnwantedMessage); err != nil {
-		log.Printf("Cannot delete first message: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	//Delete the key from chatroom.Messages
-	key := datastore.NameKey("ChatRoom", chatroomID, nil)
+	key := datastore.IDKey("ChatRoom", id, nil)
 
 	var chatroom models.ChatRoom
 
 	if err := dsClient.Get(ctx, key, &chatroom); err != nil {
-		log.Printf("Cannot retrieve chatroom from DataStore: %v", err)
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("entity not found"))
+		log.Printf("Failed to retrieve chatroom from DataStore: %v", err)
+		if err == datastore.ErrNoSuchEntity {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
-	userService := services.Locator.UserService()
-	userID := userService.GetCurrentUserID(ctx)
-
-	if userInList(userID, chatroom.Participants) {
-		log.Printf("User not participant of chatroom")
+	if !inList(user.ID, chatroom.Participants) {
+		log.Printf("User doesn't belong to this chatroom")
 		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("User not participant of chatroom"))
 		return
 	}
 
-	for i := len(chatroom.Messages) - 1; i >= 0; i-- {
-		if chatroom.Messages[i] == keyOfUnwantedMessage {
-			chatroom.Messages = append(chatroom.Messages[:i], chatroom.Messages[i+1:]...)
-			break
+	out, err := json.Marshal(chatroom)
+	if err != nil {
+		log.Printf("Failed to convert ChatRoom to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
+}
+
+var GetChatRoomMessages = UserDecorate(getChatRoomMessages)
+
+func getChatRoomMessages(w http.ResponseWriter, r *http.Request, user *models.User) {
+	ctx := appengine.NewContext(r)
+
+	dsClient := services.Locator.DsClient()
+
+	paramID := mux.Vars(r)["id"]
+
+	id, err := strconv.ParseInt(paramID, 10, 64)
+	if err != nil {
+		log.Printf("Couldn't parse id from request: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	key := datastore.IDKey("ChatRoom", id, nil)
+
+	var chatroom models.ChatRoom
+
+	if err := dsClient.Get(ctx, key, &chatroom); err != nil {
+		log.Printf("Failed to retrieve chatroom from DataStore: %v", err)
+		if err == datastore.ErrNoSuchEntity {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if !inList(user.ID, chatroom.Participants) {
+		log.Printf("User doesn't belong to this chatroom")
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	messageKeys := make([]*datastore.Key, len(chatroom.Messages))
+
+	for i, id := range chatroom.Messages {
+		messageKeys[i] = datastore.IDKey("Message", id, nil)
+	}
+
+	// send last 100 messages
+	if len(messageKeys) > 100 {
+		messageKeys = messageKeys[len(messageKeys)-100:]
+	}
+
+	var messages = make([]models.Message, len(messageKeys))
+
+	if err := dsClient.GetMulti(ctx, messageKeys, messages); err != nil {
+		log.Printf("Failed to retrieve messages from DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	out, err := json.Marshal(messages)
+	if err != nil {
+		log.Printf("Failed to convert messages to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
+}
+
+var CreateChatRoom = UserDecorate(createChatRoom)
+
+func createChatRoom(w http.ResponseWriter, r *http.Request, user *models.User) {
+	ctx := appengine.NewContext(r)
+
+	dsClient := services.Locator.DsClient()
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Cannot read request body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var requestData map[string]string
+
+	if err := json.Unmarshal(body, &requestData); err != nil {
+		log.Printf("Cannot parse json body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	requestedUser, err := GetUserByID(ctx, dsClient, requestData["requested_user_id"])
+
+	if err != nil {
+		log.Printf("Failed to retrieve user with requested id: %v", err)
+		if err == datastore.ErrNoSuchEntity {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	chatroomKey := datastore.IncompleteKey("ChatRoom", nil)
+	chatroom := new(models.ChatRoom)
+	chatroom.Participants = []string{user.ID, requestedUser.ID}
+	sort.Strings(chatroom.Participants)
+
+	var userChatrooms = make([]models.ChatRoom, len(user.Chatrooms))
+
+	if dsClient.GetMulti(ctx, user.Chatrooms, userChatrooms); err != nil {
+		log.Printf("Couldn't determine if a similar chatroom exists: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	for _, existingChatroom := range userChatrooms {
+		if listsEqual(existingChatroom.Participants, chatroom.Participants) {
+			log.Printf("Chatroom with these participants already exists")
+			w.WriteHeader(http.StatusConflict)
+			return
 		}
 	}
-	
-	// Updating chatroom messages
-	key, err = dsClient.Put(ctx, key, &chatroom)
+
+	chatroomKey, err = dsClient.Put(ctx, chatroomKey, chatroom)
 	if err != nil {
-		log.Printf("Cannot save chatroom to DataStore: %v", err)
+		log.Printf("Cannot create new chat room: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	chatroom.ID = chatroomKey.ID
+
+	user.Chatrooms = append(user.Chatrooms, chatroomKey)
+
+	if _, err = dsClient.Put(ctx, user.Key, user); err != nil {
+		log.Printf("Cannot update user: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	requestedUser.Chatrooms = append(requestedUser.Chatrooms, chatroomKey)
+
+	if _, err = dsClient.Put(ctx, requestedUser.Key, requestedUser); err != nil {
+		log.Printf("Cannot update user: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	out, err := json.Marshal(chatroom)
+	if err != nil {
+		log.Printf("Failed to convert Chatroom to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(out))
+}
+
+var PostMessageInChatRoom = UserDecorate(postMessageInChatRoom)
+
+func postMessageInChatRoom(w http.ResponseWriter, r *http.Request, user *models.User) {
+	ctx := appengine.NewContext(r)
+
+	dsClient := services.Locator.DsClient()
+
+	paramID := mux.Vars(r)["id"]
+
+	id, err := strconv.ParseInt(paramID, 10, 64)
+	if err != nil {
+		log.Printf("Couldn't parse id from request: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Cannot read request body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var requestData map[string]string
+
+	if err := json.Unmarshal(body, &requestData); err != nil {
+		log.Printf("Cannot parse json body: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	messageBody := requestData["message"]
+
+	chatroomKey := datastore.IDKey("ChatRoom", id, nil)
+
+	var chatroom models.ChatRoom
+
+	if err := dsClient.Get(ctx, chatroomKey, &chatroom); err != nil {
+		log.Printf("Failed to retrieve chatroom from DataStore: %v", err)
+		if err == datastore.ErrNoSuchEntity {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if !inList(user.ID, chatroom.Participants) {
+		log.Printf("User doesn't belong to this chatroom")
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	message := new(models.Message)
+	message.ChatRoomID = chatroom.ID
+	message.SenderID = user.ID
+	message.Timestamp = time.Now().Unix()
+	message.Body = messageBody
+
+	messageKey := datastore.IncompleteKey("Message", nil)
+
+	messageKey, err = dsClient.Put(ctx, messageKey, message)
+	if err != nil {
+		log.Printf("Failed to create message in Datastore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	message.ID = messageKey.ID
+
+	chatroom.Messages = append(chatroom.Messages, messageKey.ID)
+
+	if _, err := dsClient.Put(ctx, chatroomKey, &chatroom); err != nil {
+		log.Printf("Failed to add message to chatroom: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	out, err := json.Marshal(chatroom)
+	if err != nil {
+		log.Printf("Failed to convert Message to JSON: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(out))
+}
+
+var DeleteMessage = UserDecorate(deleteMessage)
+
+func deleteMessage(w http.ResponseWriter, r *http.Request, user *models.User) {
+	ctx := appengine.NewContext(r)
+
+	dsClient := services.Locator.DsClient()
+
+	paramID := mux.Vars(r)["id"]
+
+	id, err := strconv.ParseInt(paramID, 10, 64)
+	if err != nil {
+		log.Printf("Couldn't parse id from request: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	messageKey := datastore.IDKey("Message", id, nil)
+
+	var message models.Message
+
+	if err := dsClient.Get(ctx, messageKey, &message); err != nil {
+		log.Printf("Failed to retrieve message from DataStore: %v", err)
+		if err == datastore.ErrNoSuchEntity {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if message.SenderID != user.ID {
+		log.Printf("Message doesn't belong to this user")
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	chatroomKey := datastore.IDKey("ChatRoom", message.ChatRoomID, nil)
+
+	var chatroom models.ChatRoom
+
+	if err := dsClient.Get(ctx, chatroomKey, &chatroom); err != nil {
+		log.Printf("Failed to retrieve chatroom from DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	chatroom.Messages = removeFromList(chatroom.Messages, message.ID)
+
+	if _, err := dsClient.Put(ctx, chatroomKey, &chatroom); err != nil {
+		log.Printf("Failed to update chatroom in DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := dsClient.Delete(ctx, messageKey); err != nil {
+		log.Printf("Dalied to delete message in DataStore: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func inList(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+func listsEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func removeFromList(list []int64, item int64) []int64 {
+	for i, x := range list {
+		if x == item {
+			return append(list[:i], list[i+1:]...)
+		}
+	}
+	return list
 }
