@@ -20,6 +20,7 @@ export class FeedComponent implements OnInit {
   getImages(): void {
     this.imageService.getFeed().subscribe((images) => {
       this.images = images;
+      console.log(images)
     });
   }
 

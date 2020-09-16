@@ -10,7 +10,7 @@ export class ImageService {
   constructor(private httpClient: HttpClient) { }
 
   public getFeed() {
-    this.routeURL = "images";
+    this.routeURL = "feed-images";
     return this.httpClient.get<any>(this.routeURL);
   }
 }
