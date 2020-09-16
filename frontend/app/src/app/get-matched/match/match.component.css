@@ -1,7 +1,7 @@
 .match .profile-pic {
     object-fit: cover;
-    width: 50%;
-    height: 50%;
+    width: 100px;
+    height: 100px;
     clip-path: circle();
     display: block;
     margin-left: auto;
@@ -37,12 +37,20 @@ a {
 }
 
 .match {
-    height: 100%;
-    margin-left: 5%;
-    margin-right: 5%;
+    cursor: pointer;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    width: 150px;
+    margin: 10px;
     box-shadow: 0 2px 1px rgba(0, 0, 0, 0.09), 0 4px 2px rgba(0, 0, 0, 0.09),
     0 8px 4px rgba(0, 0, 0, 0.09), 0 16px 8px rgba(0, 0, 0, 0.09),
     0 32px 16px rgba(0, 0, 0, 0.09);
+}
+
+.match:hover {
+    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.15), 0 4px 2px rgba(0, 0, 0, 0.15),
+    0 8px 4px rgba(0, 0, 0, 0.15), 0 16px 8px rgba(0, 0, 0, 0.15),
+    0 32px 16px rgba(0, 0, 0, 0.15);
 }
 
 div {

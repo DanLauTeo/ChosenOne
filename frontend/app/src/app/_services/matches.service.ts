@@ -1,7 +1,7 @@
 import { HttpClient } from  '@angular/common/http';
 import { map } from  'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class MatchesService {
 
   public getMatches(): Observable<string[]> {
     return this.httpClient.get<MatchesResponse>("/matches/")
-      .pipe(map(resp => resp.user_ids))
+      .pipe(map(resp => resp.user_ids));
   }
 }
 

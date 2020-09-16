@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core"
+import { Component, OnInit, Input, OnChanges } from "@angular/core"
 import { ProfileService } from "../../_services/profile.service";
 import { User } from "../../_models/user";
 
@@ -11,23 +11,28 @@ export class MatchComponent implements OnInit {
 
   private profileService: ProfileService;
 
-  //@Input() user_id: string;
+  @Input() user_id: string;
 
-  @Input() user: User;
+  user: User;
 
-  constructor(
- //   profileService: ProfileService
-  ) {
-//   this.profileService = profileService;
+  constructor(profileService: ProfileService) {
+    this.profileService = profileService;
   }
 
   ngOnInit(): void {
-    //this.profileService.getUser(this.user_id)
-    //  .subscribe(user => this.user = user)
   }
 
-  startChat(): void {
-    //console.log(`Start chat with user ${this.user_id}`)
-    console.log('Start chat with user $(this.user.id)')
+  ngOnChanges(): void {
+    this.profileService.getUser(this.user_id)
+      .subscribe(user => this.user = user);
+  }
+
+  openProfile(): void {
+    console.log(`Open profile of ${this.user.id}`);
+  }
+
+  startChat(event: Event): void {
+    console.log(`Start chat with user ${this.user.id}`);
+    event.stopPropagation();
   }
 }

@@ -2,8 +2,8 @@
     margin-top: 50px;
     margin-left: 15%;
     margin-right: 15%;
-    display:grid;
-    grid-template-columns: auto auto auto;
+    display: flex;
+    flex-flow: row wrap;
 }
 
 
