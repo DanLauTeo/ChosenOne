@@ -1,12 +1,7 @@
 .match .profile-pic {
     object-fit: cover;
-<<<<<<< HEAD
-    width: 50%;
-    height: 50%;
-=======
     width: 100px;
     height: 100px;
->>>>>>> f9c49e4cee33fe22c09271b4f042c26b26dcfb0b
     clip-path: circle();
     display: block;
     margin-left: auto;
@@ -20,19 +15,16 @@ button{
     font-size: 15px;
     background-color: white;
     margin-top: 15px;
-    color: #31e98c;
+    color: #606060;
     transition: all 0.2s ease-in-out;
-    border: 2px solid #31e98c; /* Green */
-    border-radius: 8px;
+    border: none; /* Green */
     margin-bottom: 10%;
 }
 
 button:hover{
-    color: #43fbff;
-    box-shadow: 0 5px 15px #43fbff;
-    border: 2px solid #43fbff;
-<<<<<<< HEAD
-=======
+    color: #000000;
+    box-shadow: 0 5px 15px black;
+    border: none;
 }
 
 a {
@@ -58,28 +50,6 @@ a {
     box-shadow: 0 2px 1px rgba(0, 0, 0, 0.15), 0 4px 2px rgba(0, 0, 0, 0.15),
     0 8px 4px rgba(0, 0, 0, 0.15), 0 16px 8px rgba(0, 0, 0, 0.15),
     0 32px 16px rgba(0, 0, 0, 0.15);
-}
-
-div {
-    height: 70%;
->>>>>>> f9c49e4cee33fe22c09271b4f042c26b26dcfb0b
-}
-
-a {
-    text-decoration: none;
-    text-align: center;
-    color: black;
-    display: flex;
-    justify-content: center;
-}
-
-.match {
-    height: 100%;
-    margin-left: 5%;
-    margin-right: 5%;
-    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.09), 0 4px 2px rgba(0, 0, 0, 0.09),
-    0 8px 4px rgba(0, 0, 0, 0.09), 0 16px 8px rgba(0, 0, 0, 0.09),
-    0 32px 16px rgba(0, 0, 0, 0.09);
 }
 
 div {
