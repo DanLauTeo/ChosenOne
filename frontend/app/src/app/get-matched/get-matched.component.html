@@ -5,7 +5,7 @@
         <app-match [user_id]="user_id"></app-match>
     </div>
 
-    <div *ngIf="matches.length == 0">
+    <div *ngIf="isEmpty()">
         <p>
             Looks like you don't have any matches yet.
             Don't worry, they'll begin appearing here shortly after you add some photos.

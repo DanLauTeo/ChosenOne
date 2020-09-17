@@ -24,4 +24,14 @@ export class GetMatchedComponent implements OnInit {
      .subscribe(next => this.matches = next);
   }
 
+  isEmpty(): boolean {
+    if(this.matches == null ) {
+      return true;
+    }
+    else if(this.matches.length == 0) {
+      return true;
+    }
+    return false;
+  }
+
 }
