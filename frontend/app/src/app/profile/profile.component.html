@@ -1,7 +1,7 @@
 <app-top-bar></app-top-bar>
 
 <button id="logout" (click)="logout()">
-  <mat-icon>exit-to-app</mat-icon>
+  <mat-icon>exit_to_app</mat-icon>
 </button>
 
 <div class="aboutUser">
@@ -13,7 +13,7 @@
   </div>
   <div id="profileBody">
     <app-profile-pic [id]=id [picURL]=user.profilePic (user)="onPicChange($event)"></app-profile-pic>  
-      <p id="bio" > {{user.bio}} </p>
+      <p id="bio">{{user.bio}}</p>
   </div>
 </div>
-<app-gallery></app-gallery>
+<app-gallery [isCurrentUser]=isCurrentUser [routeID]=id></app-gallery>

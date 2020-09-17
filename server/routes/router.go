@@ -133,6 +133,18 @@ var apiRoutes = Routes{
 		"/tasks/recalc-user-matches/",
 		HandleRecalcUserMatches,
 	},
+	Route{
+		"Get images for feed",
+		"GET",
+		"/feed-images",
+		GetPhotosForFeed,
+	},
+	Route{
+		"Get images for gallery",
+		"GET",
+		"/user/{id}/images",
+		GetUserImages,
+	},
 }
 
 func (h ngHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

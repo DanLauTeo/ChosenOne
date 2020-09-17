@@ -15,10 +15,10 @@
 /*Contains the User struct, as well as any methods*/
 package models
 
-
 //All strings for now, type will be changed as project develops
 type Feed struct {
-	ProfilePic string
-	OwnerID    string
-	ImageURL   string
+	ProfilePic string `json:"ownerProfile"`
+	OwnerID    string `json:"ownerID"`
+	ImageURL   string `json:"imgURL"`
+	OwnerName  string `json:"ownerName"`
 }
