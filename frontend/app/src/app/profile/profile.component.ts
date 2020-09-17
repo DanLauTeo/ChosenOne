@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { User } from '../_models/user';
 import { Patch } from '../_models/patch';
 import { AccountService } from '../_services/account.service'
-import { Observable } from 'rxjs';
 import { ProfileService } from '../_services/profile.service'
-import { ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -16,7 +15,7 @@ export class ProfileComponent implements OnInit {
   isCurrentUser: boolean;
   id: string;
 
-  constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute) {
+  constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute, private router: Router) {
 
   }
 
@@ -25,21 +24,29 @@ export class ProfileComponent implements OnInit {
     this.getProfile();
   }
 
-  getProfile(): void {
+  getProfile(): void {   
     //Get ID from route
     this.id = this.route.snapshot.paramMap.get('id');
 
-    //Get ID of logged in user
-    let currentId = this.accountService.getUserID();
+    //Check if user logged in
+    if(this.accountService.getUser()==null){
+      //if true then user not logged in, can still view profile if route has ID
+      if (this.id == null) {
+        this.router.navigate(['/login'])
+      }
+    } else {
+      //Get ID of logged in user
+      let currentId = this.accountService.getUserID();
 
-    //If no ID in route, assume user is going to own profile
-    if (this.id == null) {
-      this.id = currentId;
-    } 
-
-    //If user on own profile, set isCurrentUser to true
-    if (currentId == this.id) {
-      this.isCurrentUser = true;
+      //If no ID in route, user is on own profile
+      if (this.id == null) {
+        this.id = currentId;
+      } 
+      
+      //If user on own profile, set isCurrentUser to true
+      if (currentId == this.id) {
+        this.isCurrentUser = true;
+      } 
     }
 
     this.profileService.getUser(this.id).subscribe((user) => {
@@ -48,20 +55,9 @@ export class ProfileComponent implements OnInit {
   }
 
   patchProfile(): void {
-    //Get ID from route
-    let id = this.route.snapshot.paramMap.get('id');
-
-    //Get ID of logged in user
-    let currentId = this.accountService.getUserID();
-
-    //If no ID in route, user is on own profile
-    if (id == null) {
-      id = currentId;
-    } 
-
     //If user not on own profile, return without changing
-    if (currentId != id) {
-      console.log("ID's dont match");
+    if (!this.isCurrentUser) {
+      console.log("Not on own profile");
       return;
     }
     let opArray: Patch[] = [];
@@ -74,7 +70,7 @@ export class ProfileComponent implements OnInit {
     if (this.user.bio != newBio) {
       opArray.push({op:"replace", path:"/Bio", value: newBio});
     }
-    this.profileService.patchUser(id, opArray).subscribe((user) => {
+    this.profileService.patchUser(this.id, opArray).subscribe((user) => {
       this.user = user;
     });
   }
