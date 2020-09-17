@@ -152,6 +152,8 @@ var apiRoutes = Routes{
 		"DELETE",
 		"/messages/{id}/",
 		DeleteMessage,
+	},
+	// Tasks
 	Route{
 		"Recalculate user matches",
 		"GET",
