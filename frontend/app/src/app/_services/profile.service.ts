@@ -1,27 +1,24 @@
-import { HttpClient } from  '@angular/common/http';  
+import { HttpClient } from  '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+import { User } from '../_models/user'
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
-  routeURL: string ;
-
   constructor(private httpClient: HttpClient) { }
 
-  public getUser(id) {
-    this.routeURL = "user/"+id;
-    return this.httpClient.get<any>(this.routeURL);
+  public getUser(id: string): Observable<User> {
+    return this.httpClient.get<User>(`/user/${id}/`);
   }
 
   public patchUser(id, patch) {
-    this.routeURL = "user/"+id;
-    return this.httpClient.patch<any>(this.routeURL, patch);
+    return this.httpClient.patch<any>(`/user/${id}/`, patch);
   }
-  
+
   public uploadProfilePic(id, formData) {
-    this.routeURL = "user/"+id+"/profile-image";
-    
-  return this.httpClient.put(this.routeURL, formData);
+    return this.httpClient.put(`/user/${id}/profile-image/`, formData);
   }
 }

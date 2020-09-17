@@ -4,6 +4,4 @@ export class User {
     bio: string;
     profilePic: string;
     convIDs: string[];
-    interestSign: number[];
-    token: string;
 }
