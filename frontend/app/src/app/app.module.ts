@@ -13,6 +13,7 @@ import { GalleryComponent } from './gallery/gallery.component';
 import { FeedComponent } from './feed/feed.component';
 import { ChatsComponent } from './chats/chats.component';
 import { GetMatchedComponent } from './get-matched/get-matched.component';
+import { MatchComponent } from './get-matched/match/match.component';
 import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component';
 import { ChatlistComponent } from './chats/chatlist/chatlist.component';
 import { MessagesComponent } from './chats/messages/messages.component';
@@ -24,7 +25,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-
+import { FeedImageComponent } from './feed/feed-image/feed-image.component';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatListModule } from '@angular/material/list';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -36,10 +40,12 @@ import { MatCardModule } from '@angular/material/card';
     FeedComponent,
     ChatsComponent,
     GetMatchedComponent,
+    MatchComponent,
     ProfilePicComponent,
     ChatlistComponent,
     MessagesComponent,
     EmptyChatsComponent,
+    FeedImageComponent,
   ],
   imports: [
     BrowserModule,
@@ -52,6 +58,7 @@ import { MatCardModule } from '@angular/material/card';
     MatButtonModule,
     MatIconModule,
     MatCardModule,
+    MatGridListModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

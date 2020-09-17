@@ -1,19 +1,19 @@
 <app-top-bar></app-top-bar>
 
 <button id="logout" (click)="logout()">
-  <img src="../assets/icons/logout-box-line.svg">
+  <mat-icon>exit_to_app</mat-icon>
 </button>
 
 <div class="aboutUser">
   <div>
     <h2 id="username">{{user.username}}</h2>
     <button *ngIf="isCurrentUser"  id="edit" (click)="edit()">
-      <img src="../assets/icons/create-24px.svg">
+      <mat-icon>create</mat-icon>
     </button>
   </div>
   <div id="profileBody">
-    <app-profile-pic></app-profile-pic>
-      <p id="bio" > {{user.bio}} </p>
+    <app-profile-pic [id]=id [picURL]=user.profilePic (user)="onPicChange($event)"></app-profile-pic>  
+      <p id="bio">{{user.bio}}</p>
   </div>
 </div>
-<app-gallery></app-gallery>
+<app-gallery [isCurrentUser]=isCurrentUser [routeID]=id></app-gallery>

@@ -53,7 +53,7 @@ h2{
     0 32px 16px rgba(0, 0, 0, 0.09);
 }
 
-button{
+.gridList{
   width: 50%;
   margin-left: 25%;
   background-color: white;
@@ -65,6 +65,24 @@ button{
   0 32px 16px rgba(0, 0, 0, 0.09);
 }
 
-button:hover{
+.gridList:hover{
   opacity: 0.75;
+}
+
+.img-space{
+  width: 40%;
+  margin-left: 30%;
+}
+
+.img-space img {
+  width:100%;
+}
+
+.img-space button{
+  margin: auto;
+  font-size: 20px;
+  background-color: white;
+  color: #31e98c;
+  border: 2px solid #31e98c; /* Green */
+  border-radius: 8px;
 }

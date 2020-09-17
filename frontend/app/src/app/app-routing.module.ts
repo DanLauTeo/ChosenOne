@@ -11,6 +11,7 @@ import { EmptyChatsComponent } from './empty-chats/empty-chats.component';
 const routes: Routes = [
   { path: '', component: ProfileComponent, canActivate: [AuthGuard]},
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
+  { path: 'profile/:id', component: ProfileComponent},
   { path: 'login', component: LoginComponent },
   { path: 'chats', component: EmptyChatsComponent },
   { path: 'chats/:id', component: ChatsComponent },

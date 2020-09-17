@@ -58,19 +58,19 @@ var apiRoutes = Routes{
 	Route{
 		"Profile",
 		"GET",
-		"/user/{id}",
+		"/user/{id}/",
 		GetProfile,
 	},
 	Route{
 		"Customise Profile",
 		"PATCH",
-		"/user/{id}",
+		"/user/{id}/",
 		EditProfile,
 	},
 	Route{
 		"Update Profile Pic",
 		"PUT",
-		"/user/{id}/profile-image",
+		"/user/{id}/profile-image/",
 		ProfilePic,
 	},
 	Route{
@@ -152,6 +152,23 @@ var apiRoutes = Routes{
 		"DELETE",
 		"/messages/{id}/",
 		DeleteMessage,
+	Route{
+		"Recalculate user matches",
+		"GET",
+		"/tasks/recalc-user-matches/",
+		HandleRecalcUserMatches,
+	},
+	Route{
+		"Get images for feed",
+		"GET",
+		"/feed-images",
+		GetPhotosForFeed,
+	},
+	Route{
+		"Get images for gallery",
+		"GET",
+		"/user/{id}/images",
+		GetUserImages,
 	},
 }
 
