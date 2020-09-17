@@ -44,12 +44,10 @@ export class ProfileComponent implements OnInit {
 
     this.profileService.getUser(this.id).subscribe((user) => {
       this.user = user;
-      console.log(user);
     });
   }
 
   patchProfile(): void {
-    console.log("Called");
     //Get ID from route
     let id = this.route.snapshot.paramMap.get('id');
 
@@ -95,7 +93,6 @@ export class ProfileComponent implements OnInit {
   }
 
   onPicChange(event) {
-    console.log(event);
     this.user = event;
   }
 

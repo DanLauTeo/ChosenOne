@@ -25,11 +25,9 @@ export class ProfilePicComponent implements OnInit {
   ngOnInit() {
     this.imageFile = null;
     this.isImageSaved = false;
-    console.log(this.picURL)
   }
 
   onFileChange(event) {
-    console.log(event.target.files);
     this.imageFile = event.target.files[0]
 
     this.isImageSaved = true;

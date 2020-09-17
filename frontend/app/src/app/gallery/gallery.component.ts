@@ -40,7 +40,6 @@ export class GalleryComponent implements OnInit {
   } 
 
   addImage(): void {
-    console.log(this.isImageSaved);
     if (this.imageFile == null){
       return;
     }

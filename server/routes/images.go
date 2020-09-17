@@ -58,7 +58,6 @@ func ImageUploadPage(w http.ResponseWriter, r *http.Request) {
 
 func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
-	fmt.Printf("Called")
 
 	userService := services.Locator.UserService()
 
@@ -158,7 +157,7 @@ func DeleteImage(ctx context.Context, imageID, userID string) error {
 	}
 
 	//Delete from GCS
-	imageID = "image_" + imageID
+	imageID = image.GCSObjectID()
 	err = storageClient.Delete(ctx, bucket, imageID)
 	if err != nil {
 		return err
@@ -200,6 +199,7 @@ func UploadImage(ctx context.Context, user_id, image_type string, labels []model
 func GetUserImages(w http.ResponseWriter, r *http.Request) {
 	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
+	storageClient := services.Locator.StorageClient()
 	vars := mux.Vars(r)
 	userID := vars["id"]
 
@@ -225,7 +225,7 @@ func GetUserImages(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		imageURLs = append(imageURLs, "https://storage.cloud.google.com/"+config.ImageBucket()+"/"+image.GCSObjectID())
+		imageURLs = append(imageURLs, storageClient.GetServingURL(config.ImageBucket(), image.GCSObjectID()))
 	}
 
 	out, err := json.Marshal(imageURLs)
