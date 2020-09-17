@@ -1,11 +1,13 @@
 <input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
-
+<p #errorMessage class="img-space">{{errorMsg}}</p>
 <button *ngIf="isCurrentUser && !isImageSaved" (click)="fileInput.click()" class="gridList">
   Add image
 </button>
+
 <div *ngIf="isImageSaved" class="img-space">
-  <button (click)="removeImage()">Cancel</button>
-  <button (click)="addImage()">Upload</button>
+  <button #cancel (click)="removeImage()">Cancel</button>
+  <button #upload (click)="addImage()">Upload</button>
+  
   <br>
   <img #profileImg src="{{picURL}}">
 </div>  
