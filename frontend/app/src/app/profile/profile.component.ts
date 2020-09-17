@@ -3,7 +3,6 @@ import { User } from '../_models/user';
 import { Patch } from '../_models/patch';
 import { AccountService } from '../_services/account.service'
 import { Observable } from 'rxjs';
-import { USER } from '../_mock_models/mock_user'
 import { ProfileService } from '../_services/profile.service'
 import { ActivatedRoute } from '@angular/router';
 
@@ -45,12 +44,10 @@ export class ProfileComponent implements OnInit {
 
     this.profileService.getUser(this.id).subscribe((user) => {
       this.user = user;
-      console.log(user);
     });
   }
 
   patchProfile(): void {
-    console.log("Called");
     //Get ID from route
     let id = this.route.snapshot.paramMap.get('id');
 
@@ -96,7 +93,6 @@ export class ProfileComponent implements OnInit {
   }
 
   onPicChange(event) {
-    console.log(event);
     this.user = event;
   }
 

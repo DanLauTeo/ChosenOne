@@ -42,7 +42,7 @@ func (client *GCStorageClient) Upload(ctx context.Context, file multipart.File, 
 		return "", err
 	}
 
-	return fmt.Sprintf("https://storage.cloud.google.com/%s/%s", bucket, object), nil
+	return client.GetServingURL(bucket, object), nil
 }
 
 func (client *GCStorageClient) Delete(ctx context.Context, bucket, object string) error {
@@ -55,4 +55,8 @@ func (client *GCStorageClient) Delete(ctx context.Context, bucket, object string
 	}
 	fmt.Printf("Blob %v deleted.\n", object)
 	return nil
+}
+
+func (client *GCStorageClient) GetServingURL(bucket, object string) string {
+	return fmt.Sprintf("https://storage.cloud.google.com/%s/%s", bucket, object)
 }

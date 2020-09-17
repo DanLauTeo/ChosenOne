@@ -175,6 +175,7 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	//Connect to datastore
 	ctx := appengine.NewContext(r)
 	dsClient := services.Locator.DsClient()
+	storageClient := services.Locator.StorageClient()
 
 	//Retrieve user from datastore
 	vars := mux.Vars(r)
@@ -233,7 +234,7 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 
 	//Delete old pic
 	bucket := config.ImageBucket()
-	image := oldPic[len("https://storage.cloud.google.com//image_"+bucket):]
+	image := oldPic[len(storageClient.GetServingURL(bucket, "image_")):]
 	err = DeleteImage(ctx, image, userID)
 
 	if err != nil {

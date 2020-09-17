@@ -1,14 +1,19 @@
-<button class="gridList" (click)="changeOutput()" id="gridList">
-  <img id="img" src="../../assets/icons/check_box_outline_blank-24px.svg">
-</button>
+<input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
 
+<button *ngIf="isCurrentUser && !isImageSaved" (click)="fileInput.click()" class="gridList">
+  Add image
+</button>
+<div *ngIf="isImageSaved" class="img-space">
+  <button (click)="removeImage()">Cancel</button>
+  <button (click)="addImage()">Upload</button>
+  <br>
+  <img #profileImg src="{{picURL}}">
+</div>  
+
+<button class="gridList" (click)="changeOutput()" id="gridList">
+  <mat-icon *ngIf="isGrid()">view_stream</mat-icon>
+  <mat-icon *ngIf="!isGrid()">view_module</mat-icon>
+</button>
 <div class="square-gallery" id="gallery">
-  <img class="square-item" src="../../assets/_mock_gallery/1.jpeg">
-  <img class="square-item" src="../../assets/_mock_gallery/2.jpeg">
-  <img class="square-item" src="../../assets/_mock_gallery/3.jpeg">
-  <img class="square-item" src="../../assets/_mock_gallery/4.jpeg">
-  <img class="square-item" src="../../assets/_mock_gallery/5.jpeg">
-  <img class="square-item" src="../../assets/_mock_gallery/6.jpg">
-  <img class="square-item" src="../../assets/_mock_gallery/7.jpeg">  
-  <img class="square-item" src="../../assets/_mock_gallery/8.jpg">
+  <img *ngFor="let image of images" class="square-item" src="{{image}}">
 </div>
