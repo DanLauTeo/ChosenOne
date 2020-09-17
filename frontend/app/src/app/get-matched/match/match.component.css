@@ -1,7 +1,12 @@
 .match .profile-pic {
     object-fit: cover;
+<<<<<<< HEAD
     width: 50%;
     height: 50%;
+=======
+    width: 100px;
+    height: 100px;
+>>>>>>> f9c49e4cee33fe22c09271b4f042c26b26dcfb0b
     clip-path: circle();
     display: block;
     margin-left: auto;
@@ -26,6 +31,38 @@ button:hover{
     color: #43fbff;
     box-shadow: 0 5px 15px #43fbff;
     border: 2px solid #43fbff;
+<<<<<<< HEAD
+=======
+}
+
+a {
+    text-decoration: none;
+    text-align: center;
+    color: black;
+    display: flex;
+    justify-content: center;
+}
+
+.match {
+    cursor: pointer;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    width: 150px;
+    margin: 10px;
+    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.09), 0 4px 2px rgba(0, 0, 0, 0.09),
+    0 8px 4px rgba(0, 0, 0, 0.09), 0 16px 8px rgba(0, 0, 0, 0.09),
+    0 32px 16px rgba(0, 0, 0, 0.09);
+}
+
+.match:hover {
+    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.15), 0 4px 2px rgba(0, 0, 0, 0.15),
+    0 8px 4px rgba(0, 0, 0, 0.15), 0 16px 8px rgba(0, 0, 0, 0.15),
+    0 32px 16px rgba(0, 0, 0, 0.15);
+}
+
+div {
+    height: 70%;
+>>>>>>> f9c49e4cee33fe22c09271b4f042c26b26dcfb0b
 }
 
 a {

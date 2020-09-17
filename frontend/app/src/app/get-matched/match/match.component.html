@@ -1,7 +1,7 @@
-<div class="match">
+<div class="match" (click)="openProfile()">
     <h3>
         <img src="{{user.profilePic}}" class="profile-pic">
-        <a href="/profile/{{user.id}}/">{{user.username}}</a>
+        <a>{{user.username}}</a>
     </h3>
-    <button (click)="startChat()">Start a chat</button>
+    <button (click)="startChat($event)">Start a chat</button>
 </div>
