@@ -195,7 +195,15 @@ func createChatRoom(w http.ResponseWriter, r *http.Request, user *models.User) {
 		return
 	}
 
-	requestedUser, err := GetUserByID(ctx, dsClient, requestData["requested_user_id"])
+	requestedUserID := requestData["requested_user_id"]
+
+	if requestedUserID == user.ID {
+		log.Printf("Cannot start a chatroom with yourself")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	requestedUser, err := GetUserByID(ctx, dsClient, requestedUserID)
 
 	if err != nil {
 		log.Printf("Failed to retrieve user with requested id: %v", err)
