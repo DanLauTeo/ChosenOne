@@ -80,6 +80,12 @@ var apiRoutes = Routes{
 		ProfilePic,
 	},
 	Route{
+		"List user images",
+		"GET",
+		"/user/{id}/images/",
+		GetUserImages,
+	},
+	Route{
 		"Get login URL",
 		"GET",
 		"/login-url",
@@ -97,24 +103,20 @@ var apiRoutes = Routes{
 		"/who",
 		Who,
 	},
-	Route{
-		"Upload page",
-		"GET",
-		"/upload/",
-		ImageUploadPage,
-	},
+	// Images
 	Route{
 		"Handle upload",
 		"POST",
-		"/image-uploaded/",
+		"/images/",
 		HandleImageUpload,
 	},
 	Route{
 		"Handle image delete",
 		"DELETE",
-		"/images/{imageID}",
+		"/images/{imageID}/",
 		HandleImageDelete,
 	},
+	// Matches
 	Route{
 		"Get matcher for current user",
 		"GET",
@@ -172,18 +174,12 @@ var apiRoutes = Routes{
 		"/tasks/recalc-user-matches/",
 		HandleRecalcUserMatches,
 	},
-	// Images
+	// Feed
 	Route{
 		"Get images for feed",
 		"GET",
-		"/feed-images",
+		"/feed-images/",
 		GetPhotosForFeed,
-	},
-	Route{
-		"Get images for gallery",
-		"GET",
-		"/user/{id}/images",
-		GetUserImages,
 	},
 }
 

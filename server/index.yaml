@@ -1,0 +1,8 @@
+indexes:
+
+- kind: Image
+  properties:
+  - name: owner_id
+  - name: type
+  - name: created
+    direction: desc
