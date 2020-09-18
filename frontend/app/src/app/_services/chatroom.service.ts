@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, empty, throwError } from 'rxjs';
 import { catchError, map, tap, flatMap } from 'rxjs/operators';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Chatroom } from '../_models/chatroom'
 import { Message } from '../_models/message';
 
@@ -18,6 +18,20 @@ export class ChatroomService {
 
   startChat(userId: string): Observable<Chatroom> {
     return this.httpClient.post<Chatroom>(`/chatrooms/`, {"requested_user_id": userId})
+      .pipe(
+        catchError((error, _) => {
+          if (error instanceof HttpErrorResponse && error.status == 409) {
+            return this.getChatrooms()
+              .pipe(
+                map((chatrooms, _) => {
+                  return chatrooms.find((chatroom, _) => chatroom.participants.includes(userId));
+                })
+              );
+          } else {
+            return throwError(error);
+          }
+        })
+      )
   }
 
   getChatrooms(): Observable<Chatroom[]> {
