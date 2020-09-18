@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, flatMap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Chatroom } from '../_models/chatroom'
 import { Message } from '../_models/message';
@@ -10,23 +10,37 @@ import { Message } from '../_models/message';
 })
 export class ChatroomService {
 
-  private chatroomsUrl = 'http://localhost:8000/messages';
-
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
 
-  constructor(private http: HttpClient) { }
+  constructor(private httpClient: HttpClient) { }
+
+  startChat(userId: string): Observable<Chatroom> {
+    return this.httpClient.post<Chatroom>(`/chatrooms/`, {"requested_user_id": userId})
+  }
 
   getChatrooms(): Observable<Chatroom[]> {
-    return this.http.get<Chatroom[]>(this.chatroomsUrl);
+    return this.httpClient.get<Chatroom[]>(`/chatrooms/`);
   }
 
-  getMessages(id): Observable<Message[]> {
-    return this.http.get<Message[]>(this.chatroomsUrl+'/'+id);
+  getChatroom(id: number) {
+    return this.httpClient.get<Chatroom>(`/chatrooms/${id}/`)
   }
 
-  sendMessage(id, message): Observable<Message[]> {
-    return this.http.post<Message[]>(this.chatroomsUrl+'/'+id, {message});
+  getMessages(id: number): Observable<Message[]> {
+    return this.httpClient.get<Message[]>(`/chatrooms/${id}/messages/`);
+  }
+
+  sendMessage(id: number, message: string): Observable<Message> {
+    return this.httpClient.post<Message>(`/chatrooms/${id}/messages/`, {"message": message});
+  }
+
+  getMessage(id: number): Observable<Message> {
+    return this.httpClient.get<Message>(`/messages/${id}/`)
+  }
+
+  deleteMessage(id: number) {
+    return this.httpClient.delete(`/messages/${id}/`)
   }
 }

@@ -5,6 +5,10 @@ import { ChatroomService } from '../../_services/chatroom.service';
 import { MatDividerModule } from '@angular/material/divider';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { AccountService } from '../../_services/account.service'
+import { ProfileService } from 'src/app/_services/profile.service';
+import { Observable } from 'rxjs';
+import { map, flatMap } from 'rxjs/operators';
+import { Chatroom } from 'src/app/_models/chatroom';
 
 @Component({
   selector: 'app-messages',
@@ -12,38 +16,70 @@ import { AccountService } from '../../_services/account.service'
   styleUrls: ['./messages.component.css']
 })
 export class MessagesComponent implements OnInit {
-  user : User;
-  chatroomName: string;
-  id: string;
+  user: User;
+  otherUser: User;
+  chatroom: Chatroom;
+  chatroomId: number;
   messages: Message[];
 
-  constructor(private route: ActivatedRoute, private chatroomService: ChatroomService, private accountService : AccountService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private chatroomService: ChatroomService,
+    private accountService: AccountService,
+    private profileService: ProfileService,
+  ) {
+    this.user = this.accountService.getUser();
+  }
 
   ngOnInit(): void {
-    this.user = this.accountService.getUser();
     this.route.params.subscribe(params => {
-      this.id = params['id'];
+      this.chatroomId = +params['id'];
+      this.getUserInfo();
     });
-    this.getMessages();
+  }
+
+  getUserInfo(): void {
+    this.accountService.user
+      .subscribe(user => {
+        this.user = user;
+        this.getChatroomInfo();
+      });
+  }
+
+  getChatroomInfo(): void {
+    this.chatroomService.getChatroom(this.chatroomId)
+      .subscribe(chatroom => {
+          this.chatroom = chatroom;
+          this.getOtherUserInfo();
+      });
+  }
+
+  getOtherUserInfo(): void {
+    let userId = this.user.id;
+    let otherUserId = this.chatroom.participants.filter(x => x != userId)[0];
+    this.profileService.getUser(otherUserId)
+      .subscribe(otherUser => {
+        this.otherUser = otherUser
+        this.getMessages();
+      });
   }
 
   getMessages(): void {
-    this.chatroomService.getMessages(this.id).subscribe(
+    this.chatroomService.getMessages(this.chatroomId).subscribe(
       messages => {
         this.messages = messages;
-        console.log(this.messages);
       }
     );
   }
 
   sendMessage(message): void {
-    console.log(message);
-    this.chatroomService.sendMessage(this.id, message).subscribe(
-      messages => {
-        this.messages = messages;
-        console.log(this.messages);
-      }
+    this.chatroomService.sendMessage(this.chatroomId, message).subscribe(
+      _ => this.getMessages()
     );
+  }
+
+  getSenderUsername(message: Message) {
+    return message.sender_id == this.user.id ? this.user.username : this.otherUser.username;
   }
 
 }

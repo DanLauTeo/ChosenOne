@@ -1,8 +1,8 @@
 <app-top-bar></app-top-bar>
 
 <div class="content">
-    <div *ngFor="let user_id of matches">
-        <app-match [user_id]="user_id"></app-match>
+    <div *ngFor="let userId of matches">
+        <app-match [userId]="userId"></app-match>
     </div>
 
     <div *ngIf="matches.length == 0">

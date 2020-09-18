@@ -1,5 +1,5 @@
 export class Message {
-    senderID: string;
+	sender_id: string;
+	timestamp: number;
 	body: string;
-	posted: string;
 }
