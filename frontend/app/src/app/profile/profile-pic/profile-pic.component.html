@@ -1,10 +1,13 @@
+<input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
 <form>
   <div class="form-group">
     <fieldset class="form-group">
       <div class="custom-file fileInputProfileWrap">
-        <div class="img-space">
-          <input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
+        <div class="img-space">         
             <img #profileImg src="{{picURL}}" (click)="fileInput.click()">
+            <button *ngIf="!isImageSaved" (click)="() => { fileInput.click() }">
+              Add image
+            </button>
         </div>
       </div>
     </fieldset>

@@ -89,4 +89,12 @@ export class GalleryComponent implements OnInit {
     this.imageFile = null;
     this.isImageSaved = false;
   }
+
+  deleteImage() {
+    console.log("Deletededed")
+  }
+
+  makeDeletable() {
+    console.log("Deletededed")
+  }
 }

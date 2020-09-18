@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { AccountService } from '../../_services/account.service';
 import { User  } from '../../_models/user';
 import { ProfileService } from '../../_services/profile.service'
+import { ImageService } from '../../_services/image.service'
 
 @Component({
   selector: 'app-profile-pic',
@@ -15,9 +16,9 @@ export class ProfilePicComponent implements OnInit {
   imageFile: File;
   isImageSaved: boolean;
   user : User;
-  @Output() userOut = new EventEmitter<User>(); 
+  //@Output() userOut = new EventEmitter<User>(); 
 
-  constructor( private accountService : AccountService, private profileService : ProfileService) {
+  constructor(private imageService : ImageService, private accountService : AccountService, private profileService : ProfileService) {
     //this.accountService.user.subscribe(x => this.user = x);
     this.user = accountService.getUser();
   }
@@ -28,22 +29,27 @@ export class ProfilePicComponent implements OnInit {
   }
 
   onFileChange(event) {
-    this.imageFile = event.target.files[0]
-
-    this.isImageSaved = true;
+    function thisAsThat (callback) {
+      return function () {
+          return callback.apply(null, [this].concat(arguments));
+      }
+  }
+    this.imageFile = event.target.files[0];
 
     var mimeType = event.target.files[0].type;
 		
 		if (mimeType.match(/image\/*/) == null) {
 			return;
-		}
-		
+    }
+    
 		var reader = new FileReader();
 		reader.readAsDataURL(event.target.files[0]);
 		
 		reader.onload = (_event) => {
 			this.picURL = reader.result; 
-		}
+    }
+		
+    this.isImageSaved = true;
   }
 
   onUpload() {
@@ -53,8 +59,13 @@ export class ProfilePicComponent implements OnInit {
     else{
       const uploadData = new FormData();
       uploadData.append('file', this.imageFile);
-      this.profileService.uploadProfilePic(this.id, uploadData).subscribe((user:User) => {
-        this.userOut.emit(user);
+      /*this.profileService.uploadProfilePic(this.id, uploadData).subscribe((user) => {
+        console.log(user)
+        this.isImageSaved = false;
+      });*/
+      this.imageService.uploadImage(uploadData).subscribe((out) => {
+        console.log(out);
+        this.isImageSaved = false;
       });
     }
     

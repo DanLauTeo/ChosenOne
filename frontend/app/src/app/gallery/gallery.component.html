@@ -3,6 +3,9 @@
 <button *ngIf="isCurrentUser && !isImageSaved" (click)="fileInput.click()" class="gridList">
   Add image
 </button>
+<button *ngIf="isCurrentUser && !isImageSaved" (click)="makeDeleteable()" class="gridList">
+  Remove image
+</button>
 
 <div *ngIf="isImageSaved" class="img-space">
   <button #cancel (click)="removeImage()">Cancel</button>
@@ -17,5 +20,5 @@
   <mat-icon *ngIf="!isGrid()">view_module</mat-icon>
 </button>
 <div class="square-gallery" id="gallery">
-  <img *ngFor="let image of images" class="square-item" src="{{image}}">
+  <img *ngFor="let image of images" class="square-item" src="{{image}}" (click)="deleteImage()">
 </div>

@@ -9,7 +9,7 @@ import { ChatsComponent } from './chats/chats.component';
 
 const routes: Routes = [
   { path: '', component: ProfileComponent, canActivate: [AuthGuard]},
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard]},
+  { path: 'profile', component: ProfileComponent},
   { path: 'profile/:id', component: ProfileComponent},
   { path: 'login', component: LoginComponent},
   { path: 'chats', component: ChatsComponent, canActivate: [AuthGuard] },

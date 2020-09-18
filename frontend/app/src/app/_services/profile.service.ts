@@ -19,6 +19,7 @@ export class ProfileService {
   }
 
   public uploadProfilePic(id, formData) {
-    return this.httpClient.put(`/user/${id}/profile-image/`, formData);
+    console.log(formData)
+    return this.httpClient.put("user/"+id+"/profile-image/", formData);
   }
 }
