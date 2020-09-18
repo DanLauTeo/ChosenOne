@@ -1,16 +1,13 @@
-<form>
-  <div class="form-group">
-    <fieldset class="form-group">
-      <div class="custom-file fileInputProfileWrap">
-        <div class="img-space">
-          <input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
-            <img #profileImg src="{{picURL}}" (click)="fileInput.click()">
-        </div>
+<input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
+<div class="form-group">
+  <fieldset class="form-group">
+    <div class="custom-file fileInputProfileWrap">
+      <div class="img-space">
+        <img #profileImg src="{{picURL}}" (click)="fileInput.click()">
       </div>
-    </fieldset>
-  </div>
-  <button (click)="removeImage()" *ngIf="isImageSaved">Remove</button>
-  <button (click)="onUpload()" *ngIf="isImageSaved">Upload</button>
-</form>
-
+    </div>
+  </fieldset>
+</div>
+<button (click)="removeImage()" *ngIf="isImageSaved">Remove</button>
+<button (click)="onUpload()" *ngIf="isImageSaved">Upload</button>
 
