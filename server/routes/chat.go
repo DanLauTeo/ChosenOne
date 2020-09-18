@@ -154,7 +154,7 @@ func getChatRoomMessages(w http.ResponseWriter, r *http.Request, user *models.Us
 		messageKeys = messageKeys[len(messageKeys)-100:]
 	}
 
-	var messages = make([]models.Message, len(messageKeys))
+	messages := make([]models.Message, len(messageKeys))
 
 	if err := dsClient.GetMulti(ctx, messageKeys, messages); err != nil {
 		log.Printf("Failed to retrieve messages from DataStore: %v", err)
@@ -208,8 +208,9 @@ func createChatRoom(w http.ResponseWriter, r *http.Request, user *models.User) {
 	}
 
 	chatroomKey := datastore.IncompleteKey("ChatRoom", nil)
-	chatroom := new(models.ChatRoom)
-	chatroom.Participants = []string{user.ID, requestedUser.ID}
+	chatroom := models.ChatRoom{
+		Participants: []string{user.ID, requestedUser.ID},
+	}
 	sort.Strings(chatroom.Participants)
 
 	var userChatrooms = make([]models.ChatRoom, len(user.Chatrooms))
@@ -316,11 +317,12 @@ func postMessageInChatRoom(w http.ResponseWriter, r *http.Request, user *models.
 		return
 	}
 
-	message := new(models.Message)
-	message.ChatRoomID = chatroom.ID
-	message.SenderID = user.ID
-	message.Timestamp = time.Now().Unix()
-	message.Body = messageBody
+	message := models.Message{
+		ChatRoomID: chatroom.ID,
+		SenderID:   user.ID,
+		Timestamp:  time.Now().Unix(),
+		Body:       messageBody,
+	}
 
 	messageKey := datastore.IncompleteKey("Message", nil)
 
