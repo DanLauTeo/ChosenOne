@@ -4,7 +4,7 @@ import { Patch } from '../_models/patch';
 import { AccountService } from '../_services/account.service'
 import { Observable } from 'rxjs';
 import { ProfileService } from '../_services/profile.service'
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -16,7 +16,7 @@ export class ProfileComponent implements OnInit {
   isCurrentUser: boolean;
   id: string;
 
-  constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute) {
+  constructor( private router: Router, private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute) {
 
   }
 
@@ -35,7 +35,7 @@ export class ProfileComponent implements OnInit {
     //If no ID in route, assume user is going to own profile
     if (this.id == null) {
       this.id = currentId;
-    } 
+    }
 
     //If user on own profile, set isCurrentUser to true
     if (currentId == this.id) {
@@ -57,7 +57,7 @@ export class ProfileComponent implements OnInit {
     //If no ID in route, user is on own profile
     if (id == null) {
       id = currentId;
-    } 
+    }
 
     //If user not on own profile, return without changing
     if (currentId != id) {
@@ -78,7 +78,7 @@ export class ProfileComponent implements OnInit {
       this.user = user;
     });
   }
-    
+
   edit() {
     if (this.isCurrentUser){
       if(document.getElementById("username").contentEditable ==  "true"){
@@ -97,6 +97,7 @@ export class ProfileComponent implements OnInit {
   }
 
   logout() {
-    this.accountService.logout();
+    this.accountService.didLogout();
+    this.router.navigate(["/login"]);
   }
 }

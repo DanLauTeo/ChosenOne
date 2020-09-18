@@ -17,11 +17,15 @@
 package routes
 
 import (
+	"localdev/main/services"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/gorilla/mux"
+	"google.golang.org/appengine"
 )
 
 type Route struct {
@@ -41,6 +45,8 @@ type Routes []Route
 func NewRouter() *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
+	router.Use(loggingMiddleware)
+	router.Use(userIdMiddleware)
 	for _, route := range apiRoutes {
 		router.
 			Methods(route.Method).
@@ -104,18 +110,6 @@ var apiRoutes = Routes{
 		HandleImageUpload,
 	},
 	Route{
-		"Get chatrooms from user",
-		"GET",
-		"/messages",
-		GetChatRooms,
-	},
-	Route{
-		"Get messages from chatroom",
-		"GET",
-		"/messages/{chat_roomID}",
-		GetMessagesFromChatRoom,
-	},
-	Route{
 		"Handle image delete",
 		"DELETE",
 		"/images/{imageID}",
@@ -127,12 +121,58 @@ var apiRoutes = Routes{
 		"/matches/",
 		GetMatches,
 	},
+	// ChatRooms
+	Route{
+		"Get chatroom by id",
+		"GET",
+		"/chatrooms/{id}/",
+		GetChatRoom,
+	},
+	Route{
+		"List user's chatrooms",
+		"GET",
+		"/chatrooms/",
+		ListChatRooms,
+	},
+	Route{
+		"Create a new chatroom",
+		"POST",
+		"/chatrooms/",
+		CreateChatRoom,
+	},
+	// Messages
+	Route{
+		"Get messages from a chatroom",
+		"GET",
+		"/chatrooms/{id}/messages/",
+		GetChatRoomMessages,
+	},
+	Route{
+		"Post a message to a chatroom",
+		"POST",
+		"/chatrooms/{id}/messages/",
+		PostMessageInChatRoom,
+	},
+	Route{
+		"Get a message",
+		"GET",
+		"/messages/{id}/",
+		GetMessage,
+	},
+	Route{
+		"Delete a message",
+		"DELETE",
+		"/messages/{id}/",
+		DeleteMessage,
+	},
+	// Tasks
 	Route{
 		"Recalculate user matches",
 		"GET",
 		"/tasks/recalc-user-matches/",
 		HandleRecalcUserMatches,
 	},
+	// Images
 	Route{
 		"Get images for feed",
 		"GET",
@@ -170,4 +210,27 @@ func (h ngHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	//Otherwise, serve file
 	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func userIdMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := appengine.NewContext(r)
+		userService := services.Locator.UserService()
+		re := regexp.MustCompile(`($|/)user/me(/|^)`)
+
+		if re.MatchString(r.RequestURI) {
+			vars := mux.Vars(r)
+			vars["id"] = userService.GetCurrentUserID(ctx)
+			r = mux.SetURLVars(r, vars)
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

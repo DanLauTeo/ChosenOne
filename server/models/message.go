@@ -12,14 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*Contains the message struct, as well as any methods*/
 package models
 
-import "time"
+import (
+	"cloud.google.com/go/datastore"
+)
 
-//All strings for now, type will be changed as project develops
 type Message struct {
-	SenderID string
-	Body     string
-	Posted   time.Time
+	ID         int64  `json:"id" datastore:"-"`
+	ChatRoomID int64  `json:"chatroom_id"`
+	SenderID   string `json:"sender_id"`
+	Timestamp  int64  `json:"timestamp"`
+	Body       string `json:"body"`
+}
+
+func (x *Message) LoadKey(k *datastore.Key) error {
+	x.ID = k.ID
+	return nil
+}
+
+func (x *Message) Load(ps []datastore.Property) error {
+	// Load as usual.
+	return datastore.LoadStruct(x, ps)
+}
+
+func (x *Message) Save() ([]datastore.Property, error) {
+	// Save as usual.
+	return datastore.SaveStruct(x)
 }
