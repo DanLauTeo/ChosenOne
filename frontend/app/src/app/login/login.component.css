@@ -7,7 +7,7 @@
   
   h1 {
     text-align:  center;
-    color: #31e98c;
+    color: #606060;
   }
   
   button{
@@ -17,17 +17,16 @@
       font-size: 30px;
       background-color: white;
       margin-top: 15px;
-      color: #31e98c;
+      color: #606060;;
       transition: all 0.2s ease-in-out;
-      border: 2px solid #31e98c; /* Green */
-      border-radius: 8px;
+      border: none; /* Green */
       margin-bottom: 10%;
   }
   
   button:hover{
-      color: #43fbff;
-      box-shadow: 0 5px 15px #43fbff;
-      border: 2px solid #43fbff;
+      color: 	#000000;
+      box-shadow: 0 5px 15px 	#000000;
+      border: none;
   }
   
   img{
@@ -39,6 +38,6 @@
   
   p,h2{
     text-align:  center;
-    color: #31e98c;
+    color: #606060;
   }
   

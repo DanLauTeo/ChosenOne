@@ -3,7 +3,7 @@ import { User } from '../_models/user';
 import { Patch } from '../_models/patch';
 import { AccountService } from '../_services/account.service'
 import { ProfileService } from '../_services/profile.service'
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -24,7 +24,7 @@ export class ProfileComponent implements OnInit {
     this.getProfile();
   }
 
-  getProfile(): void {   
+  getProfile(): void {
     //Get ID from route
     this.id = this.route.snapshot.paramMap.get('id');
 
@@ -41,12 +41,12 @@ export class ProfileComponent implements OnInit {
       //If no ID in route, user is on own profile
       if (this.id == null) {
         this.id = currentId;
-      } 
-      
+      }
+
       //If user on own profile, set isCurrentUser to true
       if (currentId == this.id) {
         this.isCurrentUser = true;
-      } 
+      }
     }
 
     this.profileService.getUser(this.id).subscribe((user) => {
@@ -55,6 +55,17 @@ export class ProfileComponent implements OnInit {
   }
 
   patchProfile(): void {
+    //Get ID from route
+    let id = this.route.snapshot.paramMap.get('id');
+
+    //Get ID of logged in user
+    let currentId = this.accountService.getUserID();
+
+    //If no ID in route, user is on own profile
+    if (id == null) {
+      id = currentId;
+    }
+
     //If user not on own profile, return without changing
     if (!this.isCurrentUser) {
       console.log("Not on own profile");
@@ -74,7 +85,7 @@ export class ProfileComponent implements OnInit {
       this.user = user;
     });
   }
-    
+
   edit() {
     if (this.isCurrentUser){
       if(document.getElementById("username").contentEditable ==  "true"){
@@ -93,6 +104,7 @@ export class ProfileComponent implements OnInit {
   }
 
   logout() {
-    this.accountService.logout();
+    this.accountService.didLogout();
+    this.router.navigate(["/login"]);
   }
 }

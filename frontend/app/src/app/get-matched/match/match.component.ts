@@ -1,6 +1,8 @@
 import { Component, OnInit, Input, OnChanges } from "@angular/core"
 import { ProfileService } from "../../_services/profile.service";
 import { User } from "../../_models/user";
+import { ChatroomService } from 'src/app/_services/chatroom.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: "app-match",
@@ -9,13 +11,15 @@ import { User } from "../../_models/user";
 })
 export class MatchComponent implements OnInit {
 
-  private profileService: ProfileService;
-
-  @Input() user_id: string;
+  @Input() userId: string;
 
   user: User;
 
-  constructor(profileService: ProfileService) {
+  constructor(
+    private router: Router,
+    private profileService: ProfileService,
+    private chatroomService: ChatroomService,
+  ) {
     this.profileService = profileService;
   }
 
@@ -23,7 +27,7 @@ export class MatchComponent implements OnInit {
   }
 
   ngOnChanges(): void {
-    this.profileService.getUser(this.user_id)
+    this.profileService.getUser(this.userId)
       .subscribe(user => this.user = user);
   }
 
@@ -32,7 +36,8 @@ export class MatchComponent implements OnInit {
   }
 
   startChat(event: Event): void {
-    console.log(`Start chat with user ${this.user.id}`);
+    this.chatroomService.startChat(this.userId)
+      .subscribe(chatroom => this.router.navigate([`/chats/${chatroom.id}/`]));
     event.stopPropagation();
   }
 }

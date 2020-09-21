@@ -12,14 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*Contains the User struct, as well as any methods*/
 package models
 
 import "cloud.google.com/go/datastore"
 
-//All strings for now, type will be changed as project develops
 type ChatRoom struct {
-	ID           string
-	Participants []string
-	Messages     []*datastore.Key
+	ID           int64    `json:"id" datastore:"-"`
+	Participants []string `json:"participants"`
+	Messages     []int64  `json:"messages"`
+}
+
+func (x *ChatRoom) LoadKey(k *datastore.Key) error {
+	x.ID = k.ID
+	return nil
+}
+
+func (x *ChatRoom) Load(ps []datastore.Property) error {
+	// Load as usual.
+	return datastore.LoadStruct(x, ps)
+}
+
+func (x *ChatRoom) Save() ([]datastore.Property, error) {
+	// Save as usual.
+	return datastore.SaveStruct(x)
 }

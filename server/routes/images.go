@@ -8,16 +8,15 @@ import (
 	"localdev/main/config"
 	"localdev/main/models"
 	"localdev/main/services"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"strconv"
-	"text/template"
 	"time"
 
 	"github.com/gorilla/mux"
 	"google.golang.org/api/iterator"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 
 	"cloud.google.com/go/datastore"
 )
@@ -26,34 +25,7 @@ func serveError(ctx context.Context, w http.ResponseWriter, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, "Internal Server Error")
-	log.Errorf(ctx, "%v", err)
-}
-
-var rootTemplate = template.Must(template.New("root").Parse(rootTemplateHTML))
-
-// For temporary purposes, to be deleted later
-const rootTemplateHTML = `
-	<html>
-		<body>
-			<form action="{{.}}" method="POST" enctype="multipart/form-data">
-				Upload File: <input type="file" name="file">
-				<br>
-				<input type="submit" name="submit" value="Submit">
-			</form>
-		</body>
-	</html>
-	`
-
-func ImageUploadPage(w http.ResponseWriter, r *http.Request) {
-	ctx := appengine.NewContext(r)
-
-	uploadURL := "/image-uploaded/"
-
-	w.Header().Set("Content-Type", "text/html")
-
-	if err := rootTemplate.Execute(w, uploadURL); err != nil {
-		log.Errorf(ctx, "%v", err)
-	}
+	log.Printf("Internal server error: %v", err)
 }
 
 func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +68,7 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 
 	out, err := json.Marshal(imageURL)
 	if err != nil {
-		log.Errorf(ctx, "Cannot convert url to JSON: %v", err)
+		log.Printf("Cannot convert url to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -173,7 +145,7 @@ func UploadImage(ctx context.Context, user_id, image_type string, labels []model
 	entity.Type = image_type
 	entity.OwnerID = user_id
 	entity.Labels = labels
-	entity.Created = time.Now()
+	entity.Created = time.Now().Unix()
 
 	var err error
 
@@ -211,7 +183,11 @@ func GetUserImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := datastore.NewQuery("Image").Order("-created").Filter("owner_id =", userID).Limit(100)
+	query := datastore.NewQuery("Image").
+		Order("-created").
+		Filter("owner_id=", userID).
+		Filter("type=", "user_uploaded_image")
+
 	it := dsClient.Run(ctx, query)
 
 	for {
@@ -221,7 +197,7 @@ func GetUserImages(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if err != nil {
-			log.Errorf(ctx, "Error fetching next image: %v", err)
+			log.Printf("Error fetching next image: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -230,7 +206,7 @@ func GetUserImages(w http.ResponseWriter, r *http.Request) {
 
 	out, err := json.Marshal(imageURLs)
 	if err != nil {
-		log.Errorf(ctx, "Cannot convert Images to JSON: %v", err)
+		log.Printf("Cannot convert Images to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

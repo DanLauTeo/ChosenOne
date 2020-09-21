@@ -1,0 +1,9 @@
+.chatlist {
+    height: 100%;
+    margin: 10px;
+}
+
+.minipic {
+    max-width: 50px;
+    border-radius: 50%;
+}

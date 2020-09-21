@@ -1,0 +1,10 @@
+.message {
+    position:fixed;
+    bottom:0px;
+    width:100%;
+}
+
+.message-box {
+    width:65%;
+}
+

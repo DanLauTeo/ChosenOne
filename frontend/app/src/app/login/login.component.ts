@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AccountService } from '../_services/account.service';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -16,16 +17,15 @@ export class LoginComponent implements OnInit {
     private accountService: AccountService,
   ) {
       // redirect to home if already logged in
-      if (this.accountService.getUser())
-        this.router.navigate(['/profile']);
+      this.accountService.user
+        .subscribe(_ => this.router.navigate(["/profile"]));
    }
 
   ngOnInit(): void {
   }
-  
+
   join()  {
-    this.accountService.setUser();
-    this.router.navigate(['/profile']);
+    this.accountService.didLogin();
   }
 
 }
