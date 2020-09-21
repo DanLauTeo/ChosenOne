@@ -32,7 +32,7 @@ export class MatchComponent implements OnInit {
   }
 
   openProfile(): void {
-    console.log(`Open profile of ${this.user.id}`);
+    this.router.navigate([`/profile/${this.userId}`])
   }
 
   startChat(event: Event): void {

@@ -15,6 +15,7 @@ export class GalleryComponent implements OnInit {
   picURL: any;
   isImageSaved: boolean;
   id: string;
+  errorMsg: string;
 
   constructor(private imageService : ImageService) { }
 
@@ -54,11 +55,13 @@ export class GalleryComponent implements OnInit {
   } 
 
   onFileChange(event) {
+    this.errorMsg = "";
     this.imageFile = event.target.files[0];
 
     var mimeType = event.target.files[0].type;
 		
 		if (mimeType.match(/image\/*/) == null) {
+      this.errorMsg = "Sorry, uploaded file must be an image"
 			return;
     }
     

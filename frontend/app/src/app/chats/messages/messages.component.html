@@ -1,6 +1,6 @@
 
 <mat-list>
-    <h1 mat-subheader>Chatroom with {{otherUser.username}}</h1>
+    <h1 mat-subheader>Chatroom with <a href="/profile/{{otherUser.id}}" class="user-link">{{otherUser.username}}</a></h1>
     <mat-list-item *ngFor="let message of messages; last as last">
         <h4 mat-line>{{ getSenderUsername(message) }}</h4>
         <p mat-line>{{message.body}}</p>

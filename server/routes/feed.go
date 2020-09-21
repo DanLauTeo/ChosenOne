@@ -44,8 +44,9 @@ func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//Get profile pic
+		//Get profile pic and name
 		feed.ProfilePic = user.ProfilePic
+		feed.OwnerName = user.Name
 
 		response = append(response, feed)
 	}

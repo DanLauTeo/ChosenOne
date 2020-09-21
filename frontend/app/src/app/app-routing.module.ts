@@ -16,7 +16,7 @@ const routes: Routes = [
   { path: 'chats', component: EmptyChatsComponent },
   { path: 'chats/:id', component: ChatsComponent },
   { path: 'feed', component: FeedComponent },
-  { path: 'get-matched', component: GetMatchedComponent }  
+  { path: 'get-matched', component: GetMatchedComponent }
 ];
 
 @NgModule({

@@ -55,9 +55,9 @@ export class ProfilePicComponent implements OnInit {
       uploadData.append('file', this.imageFile);
       this.profileService.uploadProfilePic(this.id, uploadData).subscribe((user:User) => {
         this.userOut.emit(user);
+        this.isImageSaved = false;
       });
     }
-    
   }
 
   removeImage() {

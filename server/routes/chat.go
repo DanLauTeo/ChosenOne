@@ -334,7 +334,7 @@ func postMessageInChatRoom(w http.ResponseWriter, r *http.Request, user *models.
 
 	messageKey := datastore.IncompleteKey("Message", nil)
 
-	messageKey, err = dsClient.Put(ctx, messageKey, message)
+	messageKey, err = dsClient.Put(ctx, messageKey, &message)
 	if err != nil {
 		log.Printf("Failed to create message in Datastore: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
