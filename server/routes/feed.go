@@ -16,7 +16,10 @@ import (
 func GetPhotosForFeed(w http.ResponseWriter, r *http.Request) {
 	var response []models.Feed
 	ctx := appengine.NewContext(r)
-	query := datastore.NewQuery("Image").Order("-created").Limit(100) //sorts Images entities by creation time in descending order
+	query := datastore.NewQuery("Image").
+		Order("-created").
+		Filter("type=", "user_uploaded_image").
+		Limit(100) //sorts Images entities by creation time in descending order
 	dsClient := services.Locator.DsClient()
 	storageClient := services.Locator.StorageClient()
 	it := dsClient.Run(ctx, query)
