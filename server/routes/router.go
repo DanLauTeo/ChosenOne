@@ -49,12 +49,14 @@ func NewRouter() *mux.Router {
 	router.Use(userIdMiddleware)
 	for _, route := range apiRoutes {
 		router.
+			PathPrefix("/api/v1/").
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(route.HandlerFunc)
 	}
-	angular := ngHandler{staticPath: "../frontend/app/dist/app", indexPath: "index.html"}
+
+	angular := ngHandler{staticPath: "./frontend/app/dist/app", indexPath: "index.html"}
 	router.PathPrefix("/").Handler(angular)
 
 	return router

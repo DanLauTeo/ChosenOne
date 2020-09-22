@@ -8,17 +8,20 @@ import { User } from '../_models/user'
   providedIn: 'root'
 })
 export class ProfileService {
+
+  basePath: string = "/api/v1"
+
   constructor(private httpClient: HttpClient) { }
 
   public getUser(id: string): Observable<User> {
-    return this.httpClient.get<User>(`/user/${id}/`);
+    return this.httpClient.get<User>(`${this.basePath}/user/${id}/`);
   }
 
   public patchUser(id, patch) {
-    return this.httpClient.patch<any>(`/user/${id}/`, patch);
+    return this.httpClient.patch<any>(`${this.basePath}/user/${id}/`, patch);
   }
 
   public uploadProfilePic(id, formData) {
-    return this.httpClient.put(`/user/${id}/profile-image/`, formData);
+    return this.httpClient.put(`${this.basePath}/user/${id}/profile-image/`, formData);
   }
 }

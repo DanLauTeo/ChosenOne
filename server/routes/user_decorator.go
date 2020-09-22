@@ -27,17 +27,11 @@ func UserDecorate(handler UserBasedHandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		user, err := GetUserByID(ctx, dsClient, userID)
+		user, err := GetOrCreateUserByID(ctx, dsClient, userID)
 
 		if err != nil {
-			if err == datastore.ErrNoSuchEntity {
-				user = createUserInDatatore(ctx, dsClient, userID)
-			}
-
-			if user == nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		handler(w, r, user)
@@ -55,7 +49,7 @@ func GetUserByID(ctx context.Context, dsClient *datastore.Client, id string) (*m
 	return &user, err
 }
 
-func createUserInDatatore(ctx context.Context, dsClient *datastore.Client, id string) *models.User {
+func createUserInDatatore(ctx context.Context, dsClient *datastore.Client, id string) (*models.User, error) {
 	user := models.User{nil, "New User", id, "", "", nil}
 
 	key := datastore.NameKey("User", id, nil)
@@ -63,10 +57,20 @@ func createUserInDatatore(ctx context.Context, dsClient *datastore.Client, id st
 	key, err := dsClient.Put(ctx, key, &user)
 	if err != nil {
 		log.Printf("Failed to create user in Datastore: %v", err)
-		return nil
+		return nil, err
 	}
 
 	user.Key = key
 
-	return &user
+	return &user, nil
+}
+
+func GetOrCreateUserByID(ctx context.Context, dsClient *datastore.Client, id string) (*models.User, error) {
+	user, err := GetUserByID(ctx, dsClient, id)
+
+	if err == datastore.ErrNoSuchEntity {
+		user, err = createUserInDatatore(ctx, dsClient, id)
+	}
+
+	return user, err
 }
