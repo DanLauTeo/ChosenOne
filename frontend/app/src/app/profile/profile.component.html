@@ -13,7 +13,7 @@
   </div>
   <div id="profileBody">
     <app-profile-pic [id]=id [picURL]=user.profilePic [isEditable]=isEditable (user)="onPicChange($event)"></app-profile-pic>  
-      <p id="bio">{{user.bio}}</p>
+    <p id="bio">{{user.bio}}</p>
   </div>
 </div>
 <app-gallery [isCurrentUser]=isCurrentUser [routeID]=id></app-gallery>

@@ -25,7 +25,7 @@
 
 #profileBody{
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 40% 60%;
   margin: auto;
   left: 30%;
   right: 30%;
