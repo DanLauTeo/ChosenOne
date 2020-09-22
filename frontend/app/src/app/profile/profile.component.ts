@@ -4,6 +4,7 @@ import { Patch } from '../_models/patch';
 import { AccountService } from '../_services/account.service'
 import { ProfileService } from '../_services/profile.service'
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChatroomService } from '../_services/chatroom.service';
 
 @Component({
   selector: 'app-profile',
@@ -15,14 +16,16 @@ export class ProfileComponent implements OnInit {
   isCurrentUser: boolean;
   isEditable: boolean;
   id: string;
+  loggedIn: boolean;
 
-  constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute, private router: Router) {
+  constructor( private accountService : AccountService, private chatroomService : ChatroomService, private profileService : ProfileService, private route : ActivatedRoute, private router: Router) {
 
   }
 
   ngOnInit(): void {
     this.isCurrentUser = false;
     this.isEditable = false;
+    this.loggedIn = false;
     this.getProfile();
   }
 
@@ -37,6 +40,7 @@ export class ProfileComponent implements OnInit {
         this.router.navigate(['/login'])
       }
     } else {
+      this.loggedIn = true;
       //Get ID of logged in user
       let currentId = this.accountService.getUserID();
 
@@ -110,5 +114,11 @@ export class ProfileComponent implements OnInit {
   logout() {
     this.accountService.didLogout();
     this.router.navigate(["/login"]);
+  }
+
+  openChat(event: Event): void {
+    this.chatroomService.startChat(this.id)
+      .subscribe(chatroom => this.router.navigate([`/chats/${chatroom.id}/`]));
+    event.stopPropagation();
   }
 }

@@ -1,7 +1,9 @@
 #bio{
   font-size: 1.5vw;
   width: 90%;
+  height: 90%;
   padding: 12%;
+  align-self: stretch;
 }
 
 #profilePic{
@@ -50,6 +52,31 @@ button:hover{
   0 16px 8px rgba(0, 0, 0, 0.09), 
   0 32px 16px rgba(0, 0, 0, 0.09);
   background-color: white;
+}
+
+#bio-section {
+  justify-self: stretch;
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: auto 10%;
+}
+.chatButton{
+  align-self: end;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+  background-color: white;
+  margin-top: 15px;
+  color: #606060;
+  transition: all 0.2s ease-in-out;
+  border: none; /* Green */
+  margin-bottom: 10%;
+}
+
+.chatButton:hover{
+  color: 	#000000;
+  box-shadow: 0 5px 15px 	#000000;
+  border: none;
 }
 
 #edit{

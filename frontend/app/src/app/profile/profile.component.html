@@ -13,7 +13,11 @@
   </div>
   <div id="profileBody">
     <app-profile-pic [id]=id [picURL]=user.profilePic [isEditable]=isEditable (user)="onPicChange($event)"></app-profile-pic>  
-    <p id="bio">{{user.bio}}</p>
+    <div id="bio-section">
+      <p id="bio">{{user.bio}}</p>
+      <button mat-raised-button class="chatButton" (click)="openChat($event)" *ngIf="!isCurrentUser && loggedIn">Chat</button>
+    </div>
+    
   </div>
 </div>
 <app-gallery [isCurrentUser]=isCurrentUser [routeID]=id></app-gallery>
