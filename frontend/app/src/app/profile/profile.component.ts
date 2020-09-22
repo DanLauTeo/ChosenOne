@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class ProfileComponent implements OnInit {
   user : User;
   isCurrentUser: boolean;
+  isEditable: boolean;
   id: string;
 
   constructor( private accountService : AccountService, private profileService : ProfileService, private route : ActivatedRoute, private router: Router) {
@@ -21,6 +22,7 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.isCurrentUser = false;
+    this.isEditable = false;
     this.getProfile();
   }
 
@@ -92,7 +94,9 @@ export class ProfileComponent implements OnInit {
         this.patchProfile()
         document.getElementById("username").contentEditable = "false";
         document.getElementById("bio").contentEditable = "false";
+        this.isEditable = false;
       } else {
+        this.isEditable = true;
         document.getElementById("username").contentEditable = "true";
         document.getElementById("bio").contentEditable = "true";
       }

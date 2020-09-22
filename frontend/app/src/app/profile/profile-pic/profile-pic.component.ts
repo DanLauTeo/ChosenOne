@@ -12,19 +12,19 @@ import { ProfileService } from '../../_services/profile.service'
 export class ProfilePicComponent implements OnInit {
   @Input() id: string;
   @Input() picURL: any;
+  @Input() isEditable: boolean;
+  currentPic: any;
   imageFile: File;
   isImageSaved: boolean;
-  user : User;
   @Output() userOut = new EventEmitter<User>(); 
 
-  constructor( private accountService : AccountService, private profileService : ProfileService) {
-    //this.accountService.user.subscribe(x => this.user = x);
-    this.user = accountService.getUser();
+  constructor(private profileService : ProfileService) {
   }
 
   ngOnInit() {
     this.imageFile = null;
     this.isImageSaved = false;
+    this.currentPic = this.picURL;
   }
 
   onFileChange(event) {
@@ -42,7 +42,7 @@ export class ProfilePicComponent implements OnInit {
 		reader.readAsDataURL(event.target.files[0]);
 		
 		reader.onload = (_event) => {
-			this.picURL = reader.result; 
+			this.currentPic = reader.result; 
 		}
   }
 
@@ -54,6 +54,7 @@ export class ProfilePicComponent implements OnInit {
       const uploadData = new FormData();
       uploadData.append('file', this.imageFile);
       this.profileService.uploadProfilePic(this.id, uploadData).subscribe((user:User) => {
+        this.picURL = user.profilePic;
         this.userOut.emit(user);
         this.isImageSaved = false;
       });
@@ -61,9 +62,9 @@ export class ProfilePicComponent implements OnInit {
   }
 
   removeImage() {
-    this.imageFile = null;
+    this.currentPic = this.picURL;   
     this.isImageSaved = false;
-    this.picURL = this.user.profilePic;
+    this.imageFile = null;
   }
 
 }
