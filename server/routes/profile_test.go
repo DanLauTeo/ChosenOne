@@ -47,7 +47,7 @@ func createMockUser(ctx context.Context, dsClient *datastore.Client, id string) 
 
 	user.Key = key
 
-	key, err = dsClient.Put(ctx, key, &user)
+	key, err = dsClient.Put(ctx, user.Key, &user)
 	if err != nil {
 		log.Printf("Failed to create user in Datastore: %v", err)
 		return nil
@@ -61,14 +61,26 @@ func fillDatastore() {
 	dsClient := services.Locator.DsClient()
 	
 	user1 := createMockUser(ctx, dsClient, "mock_user_1")
-	user2 := createMockUser(ctx, dsClient, "mock_user_2")
-	user3 := createMockUser(ctx, dsClient, "mock_user_3")
+	_, err := dsClient.Put(ctx, user1.Key, user1)
+	if err != nil {
+		log.Printf("Failed to update key user in Datastore: %v", err)
+	}
+	log.Println(user1)
+
+	var user models.User
+	if err := dsClient.Get(ctx, user1.Key, &user); err != nil {
+		log.Printf("Cannot retrieve user from DataStore: %v", err)
+	}
+
+	log.Println(user)
+	fillMockDatastore()
 }
 
 func fillMockDatastore(){
 	ctx := context.Background()
 	dsClient := services.Locator.DsClient()
-	main := createMockUser(ctx, dsClient, "2")
+	main := createMockUser(ctx, dsClient, "mock_user_id")
+	fmt.Println(main)
 }
 
 func emptyDatastore() {
@@ -78,20 +90,13 @@ func emptyDatastore() {
 	if err := dsClient.Delete(ctx, key); err != nil {
 		fmt.Println(err)
 	}
-	key = datastore.NameKey("User", "mock_user_2", nil)
-	if err := dsClient.Delete(ctx, key); err != nil {
-		fmt.Println(err)
-	}
-	key = datastore.NameKey("User", "mock_user_3", nil)
-	if err := dsClient.Delete(ctx, key); err != nil {
-		fmt.Println(err)
-	}
 }
+
 
 func TestGetProfileValid(t *testing.T) {
 	fillDatastore()
 	//Test 1: Valid request
-	req, err := http.NewRequest("GET", "/user/mock_user_1", nil)
+	req, err := http.NewRequest("GET", "/user/mock_user_1/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,13 +117,12 @@ func TestGetProfileValid(t *testing.T) {
 			rr.Body.String(), expected)
 	}
 	emptyDatastore()
-	fillMockDatastore()
 }
 
 func TestGetProfileInvalid(t *testing.T) {
 	fillDatastore()
 	//Test 2: Invalid ID
-	req, err := http.NewRequest("GET", "/user/7", nil)
+	req, err := http.NewRequest("GET", "/user/7/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,11 +149,11 @@ func TestEditProfileValid(t *testing.T) {
 	body := strings.NewReader(`[{"op": "replace", "path": "/Name", "value": "Success"},
 		{"op": "replace", "path": "/Bio", "value": "Successful change"}
 	]`)
-
-	req, err := http.NewRequest("PATCH", "/user/1", body)
+	req, err := http.NewRequest("PATCH", "/user/mock_user_id/", body)
 	if err != nil {
 		t.Fatal(err)
 	}
+	log.Println("here")
 	rr := httptest.NewRecorder()
 	handler := NewRouter()
 	handler.ServeHTTP(rr, req)
@@ -157,12 +161,16 @@ func TestEditProfileValid(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-
+	log.Println("here")
 	// Check the response body is what we expect.
-	newKey := datastore.NameKey("User", "mock_user_1", nil)
-	u := models.User{newKey, "Success","mock_user_1", "", "Successful change", nil}
-	expected, _ := json.Marshal(u)
-	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
+	newKey := datastore.NameKey("User", "mock_user_id", nil)
+	u := models.User{newKey, "Success","mock_user_id", "", "Successful change", nil}
+	json, err := json.Marshal(u)
+	if err != nil {
+		t.Errorf("handler returned unexpected body")
+	}
+	expected := string(json)
+	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), string(expected))
 	}
@@ -174,7 +182,7 @@ func TestEditProfileInvalidReplace(t *testing.T) {
 	//Test 2: Change something not allowed
 	body := strings.NewReader(`[{"op": "replace", "path": "/ID", "value": "Wronggggg"}]`)
 
-	req, err := http.NewRequest("PATCH", "/user/1", body)
+	req, err := http.NewRequest("PATCH", "/user/mock_user_id/", body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,8 +195,8 @@ func TestEditProfileInvalidReplace(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	newKey := datastore.NameKey("User", "mock_user_1", nil)
-	u := models.User{newKey, "New User","mock_user_1", "", "", nil}
+	newKey := datastore.NameKey("User", "mock_user_id", nil)
+	u := models.User{newKey, "New User","mock_user_id", "", "", nil}
 	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -204,7 +212,7 @@ func TestEditProfileInvalidOps(t *testing.T) {
 		{"op": "add", "path": "/NewPath", "value": "not allowed"}
 	]`)
 
-	req, err := http.NewRequest("PATCH", "/user/1", body)
+	req, err := http.NewRequest("PATCH", "/user/mock_user_id/", body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,8 +225,8 @@ func TestEditProfileInvalidOps(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	newKey := datastore.NameKey("User", "mock_user_1", nil)
-	u := models.User{newKey, "New User","mock_user_1", "", "", nil}
+	newKey := datastore.NameKey("User", "mock_user_id", nil)
+	u := models.User{newKey, "New User","mock_user_id", "", "", nil}
 	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
@@ -235,7 +243,7 @@ func TestEditProfileMixed(t *testing.T) {
 		{"op": "replace", "path": "/ID", "value": "Wronggggg"}
 	]`)
 
-	req, err := http.NewRequest("PATCH", "/user/1", body)
+	req, err := http.NewRequest("PATCH", "/user/mock_user_id/", body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,8 +256,8 @@ func TestEditProfileMixed(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	newKey := datastore.NameKey("User", "mock_user_1", nil)
-	u := models.User{newKey, "New User","mock_user_1", "", "Success", nil}
+	newKey := datastore.NameKey("User", "mock_user_id", nil)
+	u := models.User{newKey, "New User","mock_user_id", "", "Success", nil}
 	expected, _ := json.Marshal(u)
 	if !jsonpatch.Equal(expected, rr.Body.Bytes()) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
