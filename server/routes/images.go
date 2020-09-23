@@ -58,15 +58,19 @@ func HandleImageUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageURL, err := UploadImage(ctx, userID, "user_uploaded_image", labels, file)
+	imageURL, imageID, err := UploadImage(ctx, userID, "user_uploaded_image", labels, file)
 	if err != nil {
 		serveError(ctx, w, err)
 		return
 	}
 
 	//http.Redirect(w, r, imageURL, http.StatusFound)
+	type ImageOut struct {
+		ImageID  string `json:"imgID"`
+		ImageURL string `json:"imgURL"`
+	}
 
-	out, err := json.Marshal(imageURL)
+	out, err := json.Marshal(ImageOut{ImageID: fmt.Sprint(imageID), ImageURL: imageURL})
 	if err != nil {
 		log.Printf("Cannot convert url to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -137,7 +141,7 @@ func DeleteImage(ctx context.Context, imageID, userID string) error {
 	return nil
 }
 
-func UploadImage(ctx context.Context, user_id, image_type string, labels []models.LabelWithScore, file multipart.File) (string, error) {
+func UploadImage(ctx context.Context, user_id, image_type string, labels []models.LabelWithScore, file multipart.File) (string, int64, error) {
 	dsClient := services.Locator.DsClient()
 
 	key := datastore.IncompleteKey("Image", nil)
@@ -152,7 +156,7 @@ func UploadImage(ctx context.Context, user_id, image_type string, labels []model
 	entity.Key, err = dsClient.Put(ctx, key, entity)
 
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
 	bucket := config.ImageBucket()
@@ -162,10 +166,10 @@ func UploadImage(ctx context.Context, user_id, image_type string, labels []model
 
 	imageURL, err := storageClient.Upload(ctx, file, bucket, object)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 
-	return imageURL, nil
+	return imageURL, entity.Key.ID, nil
 }
 
 func GetUserImages(w http.ResponseWriter, r *http.Request) {
@@ -175,7 +179,12 @@ func GetUserImages(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
 
-	var imageURLs []string
+	type ImageOut struct {
+		ImageID  string `json:"imgID"`
+		ImageURL string `json:"imgURL"`
+	}
+
+	images := make([]ImageOut, 0)
 
 	if len(userID) == 0 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -201,10 +210,10 @@ func GetUserImages(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		imageURLs = append(imageURLs, storageClient.GetServingURL(config.ImageBucket(), image.GCSObjectID()))
+		images = append(images, ImageOut{ImageID: fmt.Sprint(image.Key.ID), ImageURL: storageClient.GetServingURL(config.ImageBucket(), image.GCSObjectID())})
 	}
 
-	out, err := json.Marshal(imageURLs)
+	out, err := json.Marshal(images)
 	if err != nil {
 		log.Printf("Cannot convert Images to JSON: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

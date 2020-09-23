@@ -1,0 +1,9 @@
+<h1 mat-dialog-title>Delete image</h1>
+<div mat-dialog-content>
+  <p>Are you sure you want to delete this image?</p>
+  <img id="img-preview" src="{{data.imgURL}}">
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="data.imgID" cdkFocusInitial>Delete</button>
+</div>

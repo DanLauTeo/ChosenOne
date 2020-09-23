@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -18,6 +17,8 @@ import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component
 import { ChatlistComponent } from './chats/chatlist/chatlist.component';
 import { MessagesComponent } from './chats/messages/messages.component';
 import { EmptyChatsComponent } from './empty-chats/empty-chats.component';
+import { PopupComponent } from './gallery/popup/popup.component';
+import { FeedImageComponent } from './feed/feed-image/feed-image.component';
 
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
@@ -25,8 +26,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { FeedImageComponent } from './feed/feed-image/feed-image.component';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatGridListModule } from '@angular/material/grid-list';
+
 
 @NgModule({
   declarations: [
@@ -44,6 +46,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MessagesComponent,
     EmptyChatsComponent,
     FeedImageComponent,
+    PopupComponent,
   ],
   imports: [
     BrowserModule,
@@ -57,6 +60,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatIconModule,
     MatCardModule,
     MatGridListModule,
+    MatDialogModule, 
   ],
   providers: [],
   bootstrap: [AppComponent]
