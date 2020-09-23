@@ -8,10 +8,12 @@ import { Observable, of } from 'rxjs';
 })
 export class MatchesService {
 
+  basePath: string = "/api/v1"
+
   constructor(private httpClient: HttpClient) { }
 
   public getMatches(): Observable<string[]> {
-    return this.httpClient.get<MatchesResponse>("/matches/")
+    return this.httpClient.get<MatchesResponse>(`${this.basePath}/matches/`)
       .pipe(map(resp => resp.user_ids));
   }
 }

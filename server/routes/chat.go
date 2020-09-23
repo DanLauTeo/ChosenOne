@@ -237,7 +237,7 @@ func createChatRoom(w http.ResponseWriter, r *http.Request, user *models.User) {
 		}
 	}
 
-	chatroomKey, err = dsClient.Put(ctx, chatroomKey, chatroom)
+	chatroomKey, err = dsClient.Put(ctx, chatroomKey, &chatroom)
 	if err != nil {
 		log.Printf("Cannot create new chat room: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

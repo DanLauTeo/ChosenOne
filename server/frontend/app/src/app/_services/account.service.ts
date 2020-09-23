@@ -11,6 +11,8 @@ import { User } from '../_models/user';
 })
 export class AccountService {
 
+  basePath: string = "/api/v1"
+
   loggedIn: boolean = false;
 
   getUser(): User {
@@ -22,7 +24,7 @@ export class AccountService {
   }
 
   didLogin() {
-    this.httpClient.get<User>("/user/me/")
+    this.httpClient.get<User>(`${this.basePath}/user/me/`)
       .subscribe(user => this.userSubject.next(user));
   }
 

@@ -10,6 +10,7 @@ import { Message } from '../_models/message';
 })
 export class ChatroomService {
 
+  basePath: string = "/api/v1"
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
@@ -17,7 +18,7 @@ export class ChatroomService {
   constructor(private httpClient: HttpClient) { }
 
   startChat(userId: string): Observable<Chatroom> {
-    return this.httpClient.post<Chatroom>(`/chatrooms/`, {"requested_user_id": userId})
+    return this.httpClient.post<Chatroom>(`${this.basePath}/chatrooms/`, {"requested_user_id": userId})
       .pipe(
         catchError((error, _) => {
           if (error instanceof HttpErrorResponse && error.status == 409) {
@@ -35,26 +36,26 @@ export class ChatroomService {
   }
 
   getChatrooms(): Observable<Chatroom[]> {
-    return this.httpClient.get<Chatroom[]>(`/chatrooms/`);
+    return this.httpClient.get<Chatroom[]>(`${this.basePath}/chatrooms/`);
   }
 
   getChatroom(id: number) {
-    return this.httpClient.get<Chatroom>(`/chatrooms/${id}/`)
+    return this.httpClient.get<Chatroom>(`${this.basePath}/chatrooms/${id}/`)
   }
 
   getMessages(id: number): Observable<Message[]> {
-    return this.httpClient.get<Message[]>(`/chatrooms/${id}/messages/`);
+    return this.httpClient.get<Message[]>(`${this.basePath}/chatrooms/${id}/messages/`);
   }
 
   sendMessage(id: number, message: string): Observable<Message> {
-    return this.httpClient.post<Message>(`/chatrooms/${id}/messages/`, {"message": message});
+    return this.httpClient.post<Message>(`${this.basePath}/chatrooms/${id}/messages/`, {"message": message});
   }
 
   getMessage(id: number): Observable<Message> {
-    return this.httpClient.get<Message>(`/messages/${id}/`)
+    return this.httpClient.get<Message>(`${this.basePath}/messages/${id}/`)
   }
 
   deleteMessage(id: number) {
-    return this.httpClient.delete(`/messages/${id}/`)
+    return this.httpClient.delete(`${this.basePath}/messages/${id}/`)
   }
 }

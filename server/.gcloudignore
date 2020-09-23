@@ -23,3 +23,6 @@
 *.test
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Node modules (contain a lot of files, but don't have to be deployed, since only the dist/ dir is necessary)
+node_modules/
