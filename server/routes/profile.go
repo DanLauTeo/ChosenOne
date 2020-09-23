@@ -48,13 +48,9 @@ func CheckDatastore(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("done"))
 }
 
-func GetProfile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		log.Printf("Invalid request method")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Invalid request method"))
-		return
-	}
+var GetProfile = UserDecorate(getProfile)
+
+func getProfile(w http.ResponseWriter, r *http.Request, _ *models.User) {
 
 	ctx := r.Context()
 	dsClient := services.Locator.DsClient()
