@@ -211,7 +211,7 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	//Save new pic
-	imageURL, err := UploadImage(ctx, userID, "user_profile_image", nil, file)
+	imageURL, _, err := UploadImage(ctx, userID, "user_profile_image", nil, file)
 	if err != nil {
 		log.Printf("Error saving image: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

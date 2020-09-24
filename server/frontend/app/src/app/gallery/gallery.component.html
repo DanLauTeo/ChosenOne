@@ -1,13 +1,23 @@
 <input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
 <p #errorMessage class="img-space">{{errorMsg}}</p>
-<button *ngIf="isCurrentUser && !isImageSaved" (click)="fileInput.click()" class="gridList">
-  Add image
-</button>
+<div class="button-section" *ngIf="isCurrentUser && !isImageSaved && !canDelete">
+  <button (click)="fileInput.click()" class="gridList">
+    Add image
+  </button>
+  <button (click)="allowDelete()" class="gridList">
+    Remove image
+  </button>
+</div>
+<div class="button-section" *ngIf="canDelete">
+  <button (click)="cancel()" class="gridList">
+    Cancel
+  </button>
+</div>
+
 
 <div *ngIf="isImageSaved" class="img-space">
-  <button #cancel (click)="removeImage()">Cancel</button>
-  <button #upload (click)="addImage()">Upload</button>
-  
+  <button mat-raised-button #cancel (click)="removeImage()">Cancel</button>
+  <button mat-raised-button #upload (click)="addImage()">Upload</button>  
   <br>
   <img #profileImg src="{{picURL}}">
 </div>  
@@ -17,5 +27,10 @@
   <mat-icon *ngIf="!isGrid()">view_module</mat-icon>
 </button>
 <div class="square-gallery" id="gallery">
-  <img *ngFor="let image of images" class="square-item" src="{{image}}">
+  <div  *ngIf="!canDelete">
+    <img *ngFor="let image of images" class="square-item" src="{{image.imgURL}}">
+  </div>
+  <div *ngIf="canDelete">
+    <img *ngFor="let image of images" class="square-item" src="{{image.imgURL}}" (click)="deleteImage(image)">
+  </div>
 </div>

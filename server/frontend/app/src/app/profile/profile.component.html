@@ -1,6 +1,6 @@
 <app-top-bar></app-top-bar>
 
-<button id="logout" (click)="logout()">
+<button id="logout" *ngIf="isCurrentUser" (click)="logout()">
   <mat-icon>exit_to_app</mat-icon>
 </button>
 
@@ -12,8 +12,12 @@
     </button>
   </div>
   <div id="profileBody">
-    <app-profile-pic [id]=id [picURL]=user.profilePic (user)="onPicChange($event)"></app-profile-pic>  
+    <app-profile-pic [id]=id [picURL]=user.profilePic [isEditable]=isEditable (user)="onPicChange($event)"></app-profile-pic>  
+    <div id="bio-section">
       <p id="bio">{{user.bio}}</p>
+      <button mat-raised-button class="chatButton" (click)="openChat($event)" *ngIf="!isCurrentUser && loggedIn">Chat</button>
+    </div>
+    
   </div>
 </div>
 <app-gallery [isCurrentUser]=isCurrentUser [routeID]=id></app-gallery>

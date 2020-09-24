@@ -6,3 +6,9 @@ indexes:
   - name: type
   - name: created
     direction: desc
+
+- kind: Image
+  properties:
+  - name: type
+  - name: created
+    direction: desc

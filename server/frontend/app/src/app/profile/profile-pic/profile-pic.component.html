@@ -1,9 +1,13 @@
-<input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
+
 <div class="form-group">
   <fieldset class="form-group">
     <div class="custom-file fileInputProfileWrap">
-      <div class="img-space">
-        <img #profileImg src="{{picURL}}" (click)="fileInput.click()">
+      <div *ngIf="isEditable" class="img-space">
+        <input style="display: none" type="file" (change)="onFileChange($event)" #fileInput>
+        <img #profileImg src="{{currentPic}}" (click)="fileInput.click()">      
+      </div>
+      <div *ngIf="!isEditable" class ="img-space">
+        <img  #profileImg src="{{currentPic}}">
       </div>
     </div>
   </fieldset>

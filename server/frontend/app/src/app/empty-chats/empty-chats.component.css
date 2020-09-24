@@ -7,3 +7,19 @@ welcome-message {
     width: 70%;
     float: right;
 }
+
+button{
+    margin: auto;
+    font-size: 20px;
+    background-color: #eeeeee;
+    color: #606060;
+    border: none; /* Green */
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+  
+button:hover{
+    color: 	#000000;
+    box-shadow: 0 5px 15px 	#000000;
+    border: none;
+}

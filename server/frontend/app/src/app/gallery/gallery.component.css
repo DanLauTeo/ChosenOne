@@ -1,4 +1,4 @@
-.square-gallery {
+.square-gallery div{
   margin-top:35%;
   --items: 3;
   --width: 50vw;
@@ -14,7 +14,7 @@
     0 32px 16px rgba(0, 0, 0, 0.09);
   }
   
-.square-item {
+.square-gallery div img {
   display: flex;
   justify-content: center;
   width: calc(var(--width) / var(--items));
@@ -25,7 +25,9 @@
   background-repeat: no-repeat;
   opacity: 0.85;
   transition: all 0.2s ease-out;
-  }
+}
+
+
 
 .square-item:hover{
   opacity:1;
@@ -37,7 +39,7 @@ h2{
   margin-top: 5%;
 }
 
-.list-gallery{
+.list-gallery div { 
   margin-top:35%;
   --items: 1;
   --width: 50vw;
@@ -51,6 +53,18 @@ h2{
   box-shadow: 0 2px 1px rgba(0, 0, 0, 0.09), 0 4px 2px rgba(0, 0, 0, 0.09),
     0 8px 4px rgba(0, 0, 0, 0.09), 0 16px 8px rgba(0, 0, 0, 0.09),
     0 32px 16px rgba(0, 0, 0, 0.09);
+}
+
+.list-gallery div img {
+  display: flex;
+  justify-content: center;
+  width: calc(var(--width) / var(--items));
+  background-color: #ff82a9;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  transition: all 0.2s ease-out;
 }
 
 .gridList{
@@ -82,7 +96,14 @@ h2{
   margin: auto;
   font-size: 20px;
   background-color: white;
-  color: #31e98c;
-  border: 2px solid #31e98c; /* Green */
+  color: #606060;
+  border: none; /* Green */
   border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.img-space button:hover{
+  color: 	#000000;
+  box-shadow: 0 5px 15px 	#000000;
+  border: none;
 }

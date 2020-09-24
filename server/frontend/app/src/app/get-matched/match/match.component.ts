@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, OnChanges } from "@angular/core"
 import { ProfileService } from "../../_services/profile.service";
 import { User } from "../../_models/user";
-import { ChatroomService } from 'src/app/_services/chatroom.service';
+import { ChatroomService } from '../../_services/chatroom.service';
 import { Router } from '@angular/router';
 
 @Component({
