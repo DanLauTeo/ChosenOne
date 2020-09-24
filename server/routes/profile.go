@@ -229,14 +229,16 @@ func ProfilePic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Delete old pic
-	bucket := config.ImageBucket()
-	image := oldPic[len(storageClient.GetServingURL(bucket, "image_")):]
-	err = DeleteImage(ctx, image, userID)
+	if oldPic != "/assets/icon2.png" {
+		bucket := config.ImageBucket()
+		image := oldPic[len(storageClient.GetServingURL(bucket, "image_")):]
+		err = DeleteImage(ctx, image, userID)
 
-	if err != nil {
-		log.Printf("Failure deleting image: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		if err != nil {
+			log.Printf("Failure deleting image: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	//Return updated user

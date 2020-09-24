@@ -50,7 +50,7 @@ func GetUserByID(ctx context.Context, dsClient *datastore.Client, id string) (*m
 }
 
 func createUserInDatatore(ctx context.Context, dsClient *datastore.Client, id string) (*models.User, error) {
-	user := models.User{nil, "New User", id, "", "", nil}
+	user := models.User{nil, "New User", id, "/assets/icon2.png", "Click the edit button on the right to change your name, profile pic and bio", nil}
 
 	key := datastore.NameKey("User", id, nil)
 
