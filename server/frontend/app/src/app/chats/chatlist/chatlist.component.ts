@@ -16,9 +16,9 @@ import { ProfileService } from 'src/app/_services/profile.service';
 export class ChatlistComponent implements OnInit {
 
   user: User;
-  chatrooms: Chatroom[];
-  latestMessages: Message[];
-  chatroomNames: string[];
+  chatrooms: Chatroom[] = [];
+  latestMessages: Message[] = [];
+  chatroomNames: string[] = [];
 
   constructor(
     private router: Router,
@@ -49,7 +49,7 @@ export class ChatlistComponent implements OnInit {
 
     this.chatrooms.forEach((chatroom, idx) => {
       this.latestMessages.push(null);
-      if (chatroom.messages.length > 0) {
+      if (chatroom.messages && chatroom.messages.length > 0) {
         this.chatroomService.getMessage(chatroom.messages[chatroom.messages.length - 1])
           .subscribe(message => this.latestMessages[idx] = message);
       }
