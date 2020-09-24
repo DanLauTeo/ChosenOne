@@ -82,4 +82,9 @@ export class MessagesComponent implements OnInit {
     return message.sender_id == this.user.id ? this.user.username : this.otherUser.username;
   }
 
+  deleteMessage(id: number): void {
+    this.chatroomService.deleteMessage(id)
+      .subscribe(_ => this.getMessages());
+  }
+
 }
