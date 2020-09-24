@@ -16,6 +16,7 @@ import { MatchComponent } from './get-matched/match/match.component';
 import { ProfilePicComponent } from './profile/profile-pic/profile-pic.component';
 import { ChatlistComponent } from './chats/chatlist/chatlist.component';
 import { MessagesComponent } from './chats/messages/messages.component';
+import { DeleteMessageDialogComponent } from './chats/messages/delete-message-dialog/delete-message-dialog.component';
 import { EmptyChatsComponent } from './empty-chats/empty-chats.component';
 import { PopupComponent } from './gallery/popup/popup.component';
 import { FeedImageComponent } from './feed/feed-image/feed-image.component';
@@ -47,6 +48,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     EmptyChatsComponent,
     FeedImageComponent,
     PopupComponent,
+    DeleteMessageDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -60,7 +62,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatIconModule,
     MatCardModule,
     MatGridListModule,
-    MatDialogModule, 
+    MatDialogModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

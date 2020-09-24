@@ -6,9 +6,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { AccountService } from '../../_services/account.service'
 import { ProfileService } from 'src/app/_services/profile.service';
-import { Observable } from 'rxjs';
+import { Observable, empty } from 'rxjs';
 import { map, flatMap } from 'rxjs/operators';
 import { Chatroom } from 'src/app/_models/chatroom';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteMessageDialogComponent } from './delete-message-dialog/delete-message-dialog.component';
 
 @Component({
   selector: 'app-messages',
@@ -27,6 +29,7 @@ export class MessagesComponent implements OnInit {
     private chatroomService: ChatroomService,
     private accountService: AccountService,
     private profileService: ProfileService,
+    private dialog: MatDialog,
   ) {
     this.user = this.accountService.getUser();
   }
@@ -82,8 +85,16 @@ export class MessagesComponent implements OnInit {
     return message.sender_id == this.user.id ? this.user.username : this.otherUser.username;
   }
 
-  deleteMessage(id: number): void {
-    this.chatroomService.deleteMessage(id)
+  deleteMessage(message: Message): void {
+    const dialogRef = this.dialog.open(DeleteMessageDialogComponent, {
+      width: "250px",
+      data: message
+    });
+
+    dialogRef.afterClosed()
+      .pipe(
+        flatMap((id: number, _) => id ? this.chatroomService.deleteMessage(id) : empty()),
+      )
       .subscribe(_ => this.getMessages());
   }
 

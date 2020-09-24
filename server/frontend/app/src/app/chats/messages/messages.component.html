@@ -4,7 +4,7 @@
     <mat-list-item *ngFor="let message of messages; last as last">
         <h4 mat-line>{{ getSenderUsername(message) }}</h4>
         <p mat-line>{{message.body}}</p>
-        <button *ngIf="message.sender_id == user.id" (click)="deleteMessage(message.id)">Delete</button>
+        <button *ngIf="message.sender_id == user.id" (click)="deleteMessage(message)">Delete</button>
         <mat-divider *ngIf="!last"></mat-divider>
     </mat-list-item>
 </mat-list>
