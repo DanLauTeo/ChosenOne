@@ -11,3 +11,14 @@
 h1 .user-link {
     margin-left: 5px;
 }
+
+button {
+    float: right;
+    margin: auto;
+    font-size: 20px;
+    background-color: #eeeeee;
+    color: #606060;
+    border: none; /* Green */
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
